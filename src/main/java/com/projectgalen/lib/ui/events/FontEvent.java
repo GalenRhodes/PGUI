@@ -1,11 +1,11 @@
-package com.projectgalen.lib.ui;
+package com.projectgalen.lib.ui.events;
 
 // ===========================================================================
-//     PROJECT: PGUI
-//    FILENAME: M.java
+//     PROJECT: PGBudget
+//    FILENAME: FontEvent.java
 //         IDE: IntelliJ IDEA
 //      AUTHOR: Galen Rhodes
-//        DATE: May 18, 2023
+//        DATE: May 17, 2023
 //
 // Copyright © 2023 Project Galen. All rights reserved.
 //
@@ -22,13 +22,36 @@ package com.projectgalen.lib.ui;
 // IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 // ===========================================================================
 
-import com.projectgalen.lib.utils.PGProperties;
-import com.projectgalen.lib.utils.PGResourceBundle;
-import org.jetbrains.annotations.NotNull;
+import java.awt.*;
+import java.util.EventObject;
 
-public final class M {
-    public static final @NotNull PGResourceBundle msgs  = PGResourceBundle.getPGBundle("com.projectgalen.lib.ui.messages");
-    public static final @NotNull PGProperties     props = PGProperties.getXMLProperties("settings.xml", M.class);
+public class FontEvent extends EventObject {
+    private final Font oldFont;
+    private final Font newFont;
+    private final int  oldFontSizeAdjustment;
+    private final int  newFontSizeAdjustment;
 
-    private M() { }
+    public FontEvent(Object source, Font oldFont, Font newFont, int oldFontSizeAdjustment, int newFontSizeAdjustment) {
+        super(source);
+        this.oldFont = oldFont;
+        this.newFont = newFont;
+        this.oldFontSizeAdjustment = oldFontSizeAdjustment;
+        this.newFontSizeAdjustment = newFontSizeAdjustment;
+    }
+
+    public Font getNewFont() {
+        return newFont;
+    }
+
+    public int getNewFontSizeAdjustment() {
+        return newFontSizeAdjustment;
+    }
+
+    public Font getOldFont() {
+        return oldFont;
+    }
+
+    public int getOldFontSizeAdjustment() {
+        return oldFontSizeAdjustment;
+    }
 }

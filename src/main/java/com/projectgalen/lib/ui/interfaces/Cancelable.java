@@ -1,11 +1,11 @@
-package com.projectgalen.lib.ui;
+package com.projectgalen.lib.ui.interfaces;
 
 // ===========================================================================
-//     PROJECT: PGUI
-//    FILENAME: M.java
+//     PROJECT: PGBudget
+//    FILENAME: Cancelable.java
 //         IDE: IntelliJ IDEA
 //      AUTHOR: Galen Rhodes
-//        DATE: May 18, 2023
+//        DATE: April 18, 2023
 //
 // Copyright © 2023 Project Galen. All rights reserved.
 //
@@ -22,13 +22,23 @@ package com.projectgalen.lib.ui;
 // IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 // ===========================================================================
 
-import com.projectgalen.lib.utils.PGProperties;
-import com.projectgalen.lib.utils.PGResourceBundle;
 import org.jetbrains.annotations.NotNull;
 
-public final class M {
-    public static final @NotNull PGResourceBundle msgs  = PGResourceBundle.getPGBundle("com.projectgalen.lib.ui.messages");
-    public static final @NotNull PGProperties     props = PGProperties.getXMLProperties("settings.xml", M.class);
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
-    private M() { }
+public interface Cancelable {
+    void onCancel();
+
+    class CallsCancelWindowAdapter extends WindowAdapter {
+        private final @NotNull Cancelable cancelable;
+
+        public CallsCancelWindowAdapter(@NotNull Cancelable cancelable) {
+            this.cancelable = cancelable;
+        }
+
+        public void windowClosing(WindowEvent e) {
+            cancelable.onCancel();
+        }
+    }
 }

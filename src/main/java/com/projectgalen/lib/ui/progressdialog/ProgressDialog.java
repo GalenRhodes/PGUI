@@ -5,6 +5,7 @@ import com.projectgalen.lib.ui.errors.ProgressDialogException;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,12 +22,33 @@ public class ProgressDialog extends JDialog {
     protected ButtonChoice buttonChoice = ButtonChoice.None;
     protected JLabel       finalMessageLabel;
 
-    public ProgressDialog(JFrame frame, @NotNull String title, @NotNull String message, int minValue, int maxValue, int initialValue) {
+    public ProgressDialog(@NotNull String title,
+                          @NotNull String message,
+                          @Range(from = 0, to = Integer.MAX_VALUE) int minValue,
+                          @Range(from = 0, to = Integer.MAX_VALUE) int maxValue,
+                          @Range(from = 0, to = Integer.MAX_VALUE) int initialValue) {
+        super();
+        setTitle(title);
+        setModal(true);
+        setup(message, minValue, maxValue, initialValue);
+    }
+
+    public ProgressDialog(@NotNull JFrame frame,
+                          @NotNull String title,
+                          @NotNull String message,
+                          @Range(from = 0, to = Integer.MAX_VALUE) int minValue,
+                          @Range(from = 0, to = Integer.MAX_VALUE) int maxValue,
+                          @Range(from = 0, to = Integer.MAX_VALUE) int initialValue) {
         super(frame, title, true);
         setup(message, minValue, maxValue, initialValue);
     }
 
-    public ProgressDialog(JDialog dialog, @NotNull String title, @NotNull String message, int minValue, int maxValue, int initialValue) {
+    public ProgressDialog(@NotNull JDialog dialog,
+                          @NotNull String title,
+                          @NotNull String message,
+                          @Range(from = 0, to = Integer.MAX_VALUE) int minValue,
+                          @Range(from = 0, to = Integer.MAX_VALUE) int maxValue,
+                          @Range(from = 0, to = Integer.MAX_VALUE) int initialValue) {
         super(dialog, title, true);
         setup(message, minValue, maxValue, initialValue);
     }
@@ -95,6 +117,14 @@ public class ProgressDialog extends JDialog {
     }
 
     private void setup(@NotNull String message, int minValue, int maxValue, int initialValue) {
+        if(minValue > maxValue) {
+            int i = minValue;
+            minValue = maxValue;
+            maxValue = i;
+        }
+        if(initialValue < minValue) initialValue = minValue;
+        if(initialValue > maxValue) initialValue = maxValue;
+
         setContentPane(contentPane);
         getRootPane().setDefaultButton(buttonOK);
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -207,8 +237,8 @@ public class ProgressDialog extends JDialog {
         ProgressDialog dlg = create(owner, title, message, minValue, maxValue, initialValue);
         dlg.message.setText(message);
         dlg.pack();
+        dlg.setResizable(true);
         dlg.setLocationRelativeTo(owner);
-        dlg.setResizable(false);
 
         Future<T> future = Executors.newSingleThreadExecutor().submit(() -> {
             SwingUtilities.invokeLater(() -> dlg.buttonOK.setEnabled(false));
@@ -235,7 +265,7 @@ public class ProgressDialog extends JDialog {
     private static @NotNull ProgressDialog create(Component owner, @NotNull String title, @NotNull String message, int minValue, int maxValue, int initialValue) {
         if(owner instanceof JDialog) return new ProgressDialog((JDialog)owner, title, message, minValue, maxValue, initialValue);
         if(owner instanceof JFrame) return new ProgressDialog((JFrame)owner, title, message, minValue, maxValue, initialValue);
-        return new ProgressDialog((JFrame)null, title, message, minValue, maxValue, initialValue);
+        return new ProgressDialog(title, message, minValue, maxValue, initialValue);
     }
 
     public interface ProgressExecuteDialogLambda {

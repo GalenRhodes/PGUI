@@ -1,8 +1,8 @@
-package com.projectgalen.lib.ui;
+package com.projectgalen.lib.ui.enums;
 
 // ===========================================================================
 //     PROJECT: PGUI
-//    FILENAME: M.java
+//    FILENAME: BuiltInLookAndFeelProfiles.java
 //         IDE: IntelliJ IDEA
 //      AUTHOR: Galen Rhodes
 //        DATE: May 18, 2023
@@ -22,13 +22,21 @@ package com.projectgalen.lib.ui;
 // IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 // ===========================================================================
 
-import com.projectgalen.lib.utils.PGProperties;
-import com.projectgalen.lib.utils.PGResourceBundle;
 import org.jetbrains.annotations.NotNull;
 
-public final class M {
-    public static final @NotNull PGResourceBundle msgs  = PGResourceBundle.getPGBundle("com.projectgalen.lib.ui.messages");
-    public static final @NotNull PGProperties     props = PGProperties.getXMLProperties("settings.xml", M.class);
+public enum BuiltInLookAndFeelProfiles {
+    Nimbus("javax.swing.plaf.nimbus.NimbusLookAndFeel"),
+    Metal("javax.swing.plaf.metal.MetalLookAndFeel"),
+    Motif("com.sun.java.swing.plaf.motif.MotifLookAndFeel"),
+    Aqual("com.apple.laf.AquaLookAndFeel");
 
-    private M() { }
+    private final @NotNull String className;
+
+    BuiltInLookAndFeelProfiles(@NotNull String className) {
+        this.className = className;
+    }
+
+    public @NotNull String getClassName() {
+        return className;
+    }
 }

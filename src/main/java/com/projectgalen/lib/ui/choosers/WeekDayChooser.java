@@ -1,11 +1,11 @@
-package com.projectgalen.lib.ui;
+package com.projectgalen.lib.ui.choosers;
 
 // ===========================================================================
-//     PROJECT: PGUI
-//    FILENAME: M.java
+//     PROJECT: PGBudget
+//    FILENAME: WeekDayChooser.java
 //         IDE: IntelliJ IDEA
 //      AUTHOR: Galen Rhodes
-//        DATE: May 18, 2023
+//        DATE: May 03, 2023
 //
 // Copyright © 2023 Project Galen. All rights reserved.
 //
@@ -22,13 +22,33 @@ package com.projectgalen.lib.ui;
 // IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 // ===========================================================================
 
-import com.projectgalen.lib.utils.PGProperties;
-import com.projectgalen.lib.utils.PGResourceBundle;
-import org.jetbrains.annotations.NotNull;
+import com.projectgalen.lib.utils.enums.WeekDay;
 
-public final class M {
-    public static final @NotNull PGResourceBundle msgs  = PGResourceBundle.getPGBundle("com.projectgalen.lib.ui.messages");
-    public static final @NotNull PGProperties     props = PGProperties.getXMLProperties("settings.xml", M.class);
+import javax.swing.*;
+import java.util.Objects;
 
-    private M() { }
+@SuppressWarnings("unused")
+public class WeekDayChooser extends BasicChooser {
+    public WeekDayChooser() {
+        super(false);
+    }
+
+    public WeekDayChooser(boolean noChoiceOption) {
+        super(noChoiceOption);
+    }
+
+    @Override
+    public String[] getItemList() {
+        return enumValuesList(WeekDay.values());
+    }
+
+    public WeekDay getWeekDay() {
+        int idx = chooser.getSelectedIndex();
+        if(idx < 0 || (noChoiceOption && idx == 0)) return null;
+        return WeekDay.getWeekDay(noChoiceOption ? (idx - 1) : idx);
+    }
+
+    public void setWeekDay(WeekDay weekDay) {
+        SwingUtilities.invokeLater(() -> chooser.setSelectedItem(Objects.toString(weekDay, "")));
+    }
 }

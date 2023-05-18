@@ -1,11 +1,11 @@
-package com.projectgalen.lib.ui;
+package com.projectgalen.lib.ui.listeners;
 
 // ===========================================================================
-//     PROJECT: PGUI
-//    FILENAME: M.java
+//     PROJECT: PGBudget
+//    FILENAME: YearChangedListener.java
 //         IDE: IntelliJ IDEA
 //      AUTHOR: Galen Rhodes
-//        DATE: May 18, 2023
+//        DATE: May 03, 2023
 //
 // Copyright © 2023 Project Galen. All rights reserved.
 //
@@ -22,13 +22,11 @@ package com.projectgalen.lib.ui;
 // IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 // ===========================================================================
 
-import com.projectgalen.lib.utils.PGProperties;
-import com.projectgalen.lib.utils.PGResourceBundle;
+import com.projectgalen.lib.ui.events.YearChangedEvent;
 import org.jetbrains.annotations.NotNull;
 
-public final class M {
-    public static final @NotNull PGResourceBundle msgs  = PGResourceBundle.getPGBundle("com.projectgalen.lib.ui.messages");
-    public static final @NotNull PGProperties     props = PGProperties.getXMLProperties("settings.xml", M.class);
+import java.util.EventListener;
 
-    private M() { }
+public interface YearChangedListener extends EventListener {
+    void yearChanged(@NotNull YearChangedEvent e);
 }
