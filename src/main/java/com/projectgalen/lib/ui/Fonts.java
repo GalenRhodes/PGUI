@@ -28,6 +28,8 @@ import java.awt.*;
 import java.util.Set;
 import java.util.TreeSet;
 
+import static com.projectgalen.lib.ui.M.msgs;
+
 public final class Fonts {
 
     private Fonts() { }
@@ -47,6 +49,15 @@ public final class Fonts {
 
     public static @NotNull Font changeFontStyle(@NotNull Font font, int newStyle) {
         return changeFont(font, newStyle, font.getSize());
+    }
+
+    public static @NotNull String fontStyleName(@NotNull Font font) {
+        switch (font.getStyle()) {/*@f0*/
+            case Font.PLAIN:  return msgs.getString("font.style.plain");
+            case Font.BOLD:   return msgs.getString("font.style.bold");
+            case Font.ITALIC: return msgs.getString("font.style.italic");
+            default:          return msgs.getString("font.style.bold_italic");
+        }/*@f1*/
     }
 
     public static @NotNull Set<String> getFontFamilyNames() {
