@@ -22,8 +22,15 @@ package com.projectgalen.lib.ui;
 // IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 // ===========================================================================
 
+import com.projectgalen.lib.utils.U;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.Set;
 import java.util.TreeSet;
@@ -36,6 +43,11 @@ public final class Fonts {
 
     public static @NotNull Font addFontStyle(@NotNull Font font, int addStyle) {
         return changeFont(font, (font.getStyle() | addStyle), font.getSize());
+    }
+
+    @Contract("_, _ -> new")
+    public static @NotNull Font changeFace(@NotNull Font faceFont, @NotNull Font styleSizeFont) {
+        return new Font(faceFont.getFamily(), styleSizeFont.getStyle(), styleSizeFont.getSize());
     }
 
     public static @NotNull Font changeFont(@NotNull Font font, int style, int size) {
@@ -65,5 +77,44 @@ public final class Fonts {
         Set<String> fontFamilies = new TreeSet<>();
         for(Font f : fonts) fontFamilies.add(f.getFamily());
         return fontFamilies;
+    }
+
+    public static void setBorderFonts(@Nullable Border b, @NotNull Font font) {
+        if(b != null) {
+            if(b instanceof TitledBorder) {
+                TitledBorder titledBorder = (TitledBorder)b;
+                titledBorder.setTitleFont(changeFace(font, titledBorder.getTitleFont()));
+            }
+            else if(b instanceof CompoundBorder) {
+                CompoundBorder cb = (CompoundBorder)b;
+                setBorderFonts(cb.getInsideBorder(), font);
+                setBorderFonts(cb.getOutsideBorder(), font);
+            }
+        }
+    }
+
+    public static void setFonts(@NotNull Component c, @NotNull Font font, String... menuItemsToIgnore) {
+        if(c instanceof Container) {
+            for(Component cc : ((Container)c).getComponents()) setFonts(cc, font, menuItemsToIgnore);
+        }
+        if(c instanceof JComponent) {
+            setBorderFonts(((JComponent)c).getBorder(), font);
+        }
+        if(c instanceof JMenu) {
+            setMenuFonts((JMenu)c, font, menuItemsToIgnore);
+        }
+        c.setFont(changeFace(font, c.getFont()));
+    }
+
+    public static void setFonts(@NotNull Component c, @NotNull Font font) {
+        setFonts(c, font, msgs.getString("menu.font"));
+    }
+
+    public static void setMenuFonts(@NotNull JMenu m, @NotNull Font font) {
+        setMenuFonts(m, font, msgs.getString("menu.font"));
+    }
+
+    public static void setMenuFonts(@NotNull JMenu m, @NotNull Font font, String... menuItemsToIgnore) {
+        if(!U.isObjIn(m.getText(), menuItemsToIgnore)) for(Component mc : m.getMenuComponents()) setFonts(mc, font);
     }
 }

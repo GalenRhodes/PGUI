@@ -33,10 +33,6 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.TitledBorder;
-import java.awt.*;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.UUID;
@@ -48,11 +44,6 @@ public final class UI {
     public static final int CANGROW_CANSHRINK = (GridConstraints.SIZEPOLICY_CAN_GROW | GridConstraints.SIZEPOLICY_CAN_SHRINK);
 
     private UI() { }
-
-    @Contract("_, _ -> new")
-    public static @NotNull Font changeFace(@NotNull Font faceFont, @NotNull Font styleSizeFont) {
-        return new Font(faceFont.getFamily(), styleSizeFont.getStyle(), styleSizeFont.getSize());
-    }
 
     @Contract(value = "_, _ -> new", pure = true)
     public static @NotNull GridConstraints getGridConstraints(int row, int column) {
@@ -179,51 +170,12 @@ public final class UI {
         else SwingUtilities.invokeLater(runnable);
     }
 
-    public static void setBorderFonts(@Nullable Border b, @NotNull Font font) {
-        if(b != null) {
-            if(b instanceof TitledBorder) {
-                TitledBorder titledBorder = (TitledBorder)b;
-                titledBorder.setTitleFont(changeFace(font, titledBorder.getTitleFont()));
-            }
-            else if(b instanceof CompoundBorder) {
-                CompoundBorder cb = (CompoundBorder)b;
-                setBorderFonts(cb.getInsideBorder(), font);
-                setBorderFonts(cb.getOutsideBorder(), font);
-            }
-        }
-    }
-
     public static void setFlatLaf() throws UnsupportedLookAndFeelException {
         UIManager.setLookAndFeel(new FlatLightLaf());
     }
 
-    public static void setFonts(@NotNull Component c, @NotNull Font font, String... menuItemsToIgnore) {
-        if(c instanceof Container) {
-            for(Component cc : ((Container)c).getComponents()) setFonts(cc, font, menuItemsToIgnore);
-        }
-        if(c instanceof JComponent) {
-            setBorderFonts(((JComponent)c).getBorder(), font);
-        }
-        if(c instanceof JMenu) {
-            setMenuFonts((JMenu)c, font, menuItemsToIgnore);
-        }
-        c.setFont(changeFace(font, c.getFont()));
-    }
-
-    public static void setFonts(@NotNull Component c, @NotNull Font font) {
-        setFonts(c, font, M.msgs.getString("menu.font"));
-    }
-
     public static void setLookAndFeel(@NotNull BuiltInLookAndFeelProfiles profile) throws UnsupportedLookAndFeelException, ReflectiveOperationException {
         UIManager.setLookAndFeel(profile.getClassName());
-    }
-
-    public static void setMenuFonts(@NotNull JMenu m, @NotNull Font font) {
-        setMenuFonts(m, font, M.msgs.getString("menu.font"));
-    }
-
-    public static void setMenuFonts(@NotNull JMenu m, @NotNull Font font, String... menuItemsToIgnore) {
-        if(!U.isObjIn(m.getText(), menuItemsToIgnore)) for(Component mc : m.getMenuComponents()) setFonts(mc, font);
     }
 
     private static final class UIFuture<T> implements Future<T> {
