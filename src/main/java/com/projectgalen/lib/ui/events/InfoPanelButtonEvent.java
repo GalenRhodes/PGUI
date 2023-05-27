@@ -22,7 +22,7 @@ package com.projectgalen.lib.ui.events;
 // IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 // ===========================================================================
 
-import com.projectgalen.lib.ui.ButtonChoice;
+import com.projectgalen.lib.ui.UIButtonChoice;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,11 +30,11 @@ import java.util.EventObject;
 
 @SuppressWarnings("unused")
 public class InfoPanelButtonEvent extends EventObject {
-    private final ButtonChoice button;
-    private final int          selectedIndex;
-    private final Object       selectedObject;
-    private final Object[]     selectedObjects;
-    private final int[]        selectedIndicies;
+    private final UIButtonChoice button;
+    private final int            selectedIndex;
+    private final Object         selectedObject;
+    private final Object[]       selectedObjects;
+    private final int[]          selectedIndicies;
 
     /**
      * Constructs a prototypical Event.
@@ -43,7 +43,7 @@ public class InfoPanelButtonEvent extends EventObject {
      *
      * @throws IllegalArgumentException if source is null
      */
-    public InfoPanelButtonEvent(@NotNull Object source, @NotNull ButtonChoice button, int index, @Nullable Object selected) {
+    public InfoPanelButtonEvent(@NotNull Object source, @NotNull UIButtonChoice button, int index, @Nullable Object selected) {
         super(source);
         this.button = button;
         this.selectedIndex = index;
@@ -52,7 +52,7 @@ public class InfoPanelButtonEvent extends EventObject {
         this.selectedObjects = new Object[]{ selected };
     }
 
-    public InfoPanelButtonEvent(@NotNull Object source, @NotNull ButtonChoice button, int @NotNull [] indicies, Object @NotNull [] selected) {
+    public InfoPanelButtonEvent(@NotNull Object source, @NotNull UIButtonChoice button, int @NotNull [] indicies, Object @NotNull [] selected) {
         super(source);
         this.button = button;
         this.selectedObjects = selected;
@@ -61,7 +61,7 @@ public class InfoPanelButtonEvent extends EventObject {
         this.selectedIndex = ((indicies.length == 0) ? -1 : indicies[0]);
     }
 
-    public ButtonChoice getButton() {
+    public UIButtonChoice getButton() {
         return button;
     }
 

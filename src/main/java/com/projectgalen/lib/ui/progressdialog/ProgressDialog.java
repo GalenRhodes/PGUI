@@ -1,6 +1,6 @@
 package com.projectgalen.lib.ui.progressdialog;
 
-import com.projectgalen.lib.ui.ButtonChoice;
+import com.projectgalen.lib.ui.UIButtonChoice;
 import com.projectgalen.lib.ui.errors.ProgressDialogException;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -15,12 +15,12 @@ import java.util.concurrent.Future;
 @SuppressWarnings("unused")
 public class ProgressDialog extends JDialog {
 
-    protected JPanel       contentPane;
-    protected JButton      buttonOK;
-    protected JProgressBar progressBar;
-    protected JLabel       message;
-    protected ButtonChoice buttonChoice = ButtonChoice.None;
-    protected JLabel       finalMessageLabel;
+    protected JPanel         contentPane;
+    protected JButton        buttonOK;
+    protected JProgressBar   progressBar;
+    protected JLabel         message;
+    protected UIButtonChoice buttonChoice = UIButtonChoice.None;
+    protected JLabel         finalMessageLabel;
 
     public ProgressDialog(@NotNull String title,
                           @NotNull String message,
@@ -53,7 +53,7 @@ public class ProgressDialog extends JDialog {
         setup(message, minValue, maxValue, initialValue);
     }
 
-    public ButtonChoice getButtonChoice() {
+    public UIButtonChoice getButtonChoice() {
         return buttonChoice;
     }
 
@@ -98,7 +98,7 @@ public class ProgressDialog extends JDialog {
     }
 
     private void onOK() {
-        buttonChoice = ButtonChoice.OK;
+        buttonChoice = UIButtonChoice.OK;
         dispose();
     }
 

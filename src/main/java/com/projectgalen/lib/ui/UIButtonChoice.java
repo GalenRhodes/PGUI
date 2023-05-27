@@ -22,6 +22,6 @@ package com.projectgalen.lib.ui;
 // IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 // ===========================================================================
 
-public enum ButtonChoice {
-    None, OK, Cancel, NewUser, Edit, Delete, Add
+public enum UIButtonChoice {
+    None, OK
 }
