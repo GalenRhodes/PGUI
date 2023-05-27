@@ -2,25 +2,5 @@
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
     <!-- # -->
-    <entry key="default.settings.locations">./settings/settings.json</entry>
-    <entry key="default.main.window.size">1500x800</entry>
     <!-- # -->
-    <entry key="minimum.user.age">13</entry>
-    <entry key="maximum.user.age">110</entry>
-    <entry key="minimum.username.length">7</entry>
-    <entry key="minimum.password.length">8</entry>
-    <entry key="maximum.email.length">254</entry>
-    <entry key="period.values.selected">3</entry>
-    <entry key="period.start_date.initial">1</entry>
-    <entry key="period.2xmonthly.date1">1</entry>
-    <entry key="period.2xmonthly.date2">15</entry>
-    <entry key="days_of_month">1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31</entry>
-    <!-- # -->
-    <entry key="key.last_active_budget">LastActiveBudget</entry>
-    <!-- # -->
-    <entry key="date.format.super_long">EEEE, MMMM d, yyyy</entry>
-    <entry key="date.format.long">MMMM d, yyyy</entry>
-    <entry key="date.format.short">MM/dd/yyyy</entry>
-    <!-- # -->
-    <entry key="info.table.budget.preferred.width">250</entry>
 </properties>
