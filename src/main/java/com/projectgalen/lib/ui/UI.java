@@ -26,7 +26,6 @@ import com.formdev.flatlaf.FlatLightLaf;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.projectgalen.lib.ui.enums.BuiltInLookAndFeelProfiles;
 import com.projectgalen.lib.utils.U;
-import com.projectgalen.lib.utils.refs.ObjectRef;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -35,8 +34,9 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.io.IOException;
 import java.util.Objects;
-import java.util.UUID;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 
 @SuppressWarnings("unused")
 public final class UI {
@@ -75,19 +75,7 @@ public final class UI {
 
     @Contract(value = "_, _, _, _ -> new", pure = true)
     public static @NotNull GridConstraints getHSpacerConstraints(int row, int column, int rowSpan, int colSpan) {
-        return new GridConstraints(row,
-                                   column,
-                                   rowSpan,
-                                   colSpan,
-                                   GridConstraints.ANCHOR_CENTER,
-                                   GridConstraints.FILL_HORIZONTAL,
-                                   CANGROW_WANTGROW,
-                                   GridConstraints.SIZEPOLICY_FIXED,
-                                   null,
-                                   null,
-                                   null,
-                                   0,
-                                   false);
+        return new GridConstraints(row, column, rowSpan, colSpan, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, CANGROW_WANTGROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false);
     }
 
     public static @NotNull Icon getIcon(@NotNull String name, @NotNull Class<?> referenceClass) {
@@ -104,19 +92,7 @@ public final class UI {
 
     @Contract(value = "_, _, _, _ -> new", pure = true)
     public static @NotNull GridConstraints getVSpacerConstraints(int row, int column, int rowSpan, int colSpan) {
-        return new GridConstraints(row,
-                                   column,
-                                   rowSpan,
-                                   colSpan,
-                                   GridConstraints.ANCHOR_CENTER,
-                                   GridConstraints.FILL_VERTICAL,
-                                   GridConstraints.SIZEPOLICY_FIXED,
-                                   CANGROW_WANTGROW,
-                                   null,
-                                   null,
-                                   null,
-                                   0,
-                                   false);
+        return new GridConstraints(row, column, rowSpan, colSpan, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_FIXED, CANGROW_WANTGROW, null, null, null, 0, false);
     }
 
     public static <T> @Nullable T invokeAndGet(@NotNull Callable<T> callable) {
@@ -125,14 +101,13 @@ public final class UI {
 
     public static <T> @Nullable T invokeAndGet(boolean propagateExceptions, @NotNull Callable<T> callable) {
         if(SwingUtilities.isEventDispatchThread()) return U.propagate(propagateExceptions, callable);
-
-        return U.propagate(propagateExceptions, () -> {
-            ObjectRef<T>         val = new ObjectRef<>();
-            ObjectRef<Exception> err = new ObjectRef<>();
-            SwingUtilities.invokeAndWait(() -> { try { val.value = callable.call(); } catch(Exception e) { err.value = e; } });
-            if(err.value != null) throw err.value;
-            return val.value;
-        });
+        try {
+            return new UIFuture<>(callable).get();
+        }
+        catch(Exception e) {
+            if(propagateExceptions) throw U.makeRuntimeException(e);
+            return null;
+        }
     }
 
     @Contract("_ -> new")
@@ -141,24 +116,14 @@ public final class UI {
         return new UIFuture<>(callable);
     }
 
-    public static void invokeAndWait(@NotNull Runnable runnable) {
-        invokeAndWait(false, runnable);
-    }
-
-    public static void invokeAndWait(boolean propagateExceptions, @NotNull Runnable runnable) {
+    public static void invokeAndWait(@NotNull ThrowingRunnable runnable) {
+        AtomicReference<Exception> ex = new AtomicReference<>(null);
         try {
-            if(SwingUtilities.isEventDispatchThread()) {
-                runnable.run();
-            }
-            else {
-                ObjectRef<Exception> err = new ObjectRef<>();
-                SwingUtilities.invokeAndWait(() -> { try { runnable.run(); } catch(Exception e) { err.value = e; } });
-                if(propagateExceptions && (err.value != null)) throw U.makeRuntimeException(err.value);
-            }
+            if(SwingUtilities.isEventDispatchThread()) runnable.run();
+            else SwingUtilities.invokeAndWait(() -> { try { runnable.run(); } catch(Exception e) { ex.set(e); } });
         }
-        catch(Exception e) {
-            if(propagateExceptions) throw U.makeRuntimeException(e);
-        }
+        catch(Exception e) { throw U.makeRuntimeException(e); }
+        if(ex.get() != null) throw U.makeRuntimeException(ex.get());
     }
 
     public static void invokeLater(@NotNull Runnable runnable) {
@@ -176,73 +141,5 @@ public final class UI {
 
     public static void setLookAndFeel(@NotNull BuiltInLookAndFeelProfiles profile) throws UnsupportedLookAndFeelException, ReflectiveOperationException {
         UIManager.setLookAndFeel(profile.getClassName());
-    }
-
-    private static final class UIFuture<T> implements Future<T> {
-        private final Callable<T> callable;
-        private final Object      lockObject = UUID.randomUUID().toString();
-        private       boolean     done       = false;
-        private       Exception   error      = null;
-        private       T           results    = null;
-
-        public UIFuture(Callable<T> callable) {
-            this.callable = callable;
-            SwingUtilities.invokeLater(this::invokeCallable);
-        }
-
-        @Override
-        public boolean cancel(boolean mayInterruptIfRunning) {
-            return false;
-        }
-
-        @Override
-        public @Nullable T get() throws InterruptedException, ExecutionException {
-            synchronized(lockObject) {
-                while(!done) lockObject.wait();
-                return _get();
-            }
-        }
-
-        @Contract(pure = true)
-        @Override
-        public @Nullable T get(long timeout, @NotNull TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-            if(timeout < 0) throw new IllegalArgumentException("Timeout cannot be less than zero.");
-            long millis = unit.toMillis(timeout);
-            if(millis > TimeUnit.DAYS.toMillis(365)) throw new IllegalArgumentException("Timeout cannot be greater than one year.");
-
-            synchronized(lockObject) {
-                if(done) return _get();
-                long when = (System.currentTimeMillis() + millis);
-                do {
-                    lockObject.wait(unit.toMillis(when - System.currentTimeMillis()));
-                    if(done) return _get();
-                    if(System.currentTimeMillis() >= when) throw new TimeoutException();
-                }
-                while(true);
-            }
-        }
-
-        @Override
-        public boolean isCancelled() {
-            return false;
-        }
-
-        @Override
-        public boolean isDone() {
-            synchronized(lockObject) { return done; }
-        }
-
-        private T _get() throws ExecutionException {
-            if(error != null) throw new ExecutionException(error);
-            return results;
-        }
-
-        private void invokeCallable() {
-            try { results = this.callable.call(); } catch(Exception e) { synchronized(lockObject) { error = e; } }
-            synchronized(lockObject) {
-                done = true;
-                lockObject.notifyAll();
-            }
-        }
     }
 }
