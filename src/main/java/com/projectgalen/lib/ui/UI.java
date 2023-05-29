@@ -25,7 +25,6 @@ package com.projectgalen.lib.ui;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.projectgalen.lib.ui.enums.BuiltInLookAndFeelProfiles;
-import com.projectgalen.lib.utils.U;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,6 +36,9 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static com.projectgalen.lib.utils.errors.Errors.makeRuntimeException;
+import static com.projectgalen.lib.utils.errors.Errors.propagate;
 
 @SuppressWarnings("unused")
 public final class UI {
@@ -100,12 +102,12 @@ public final class UI {
     }
 
     public static <T> @Nullable T invokeAndGet(boolean propagateExceptions, @NotNull Callable<T> callable) {
-        if(SwingUtilities.isEventDispatchThread()) return U.propagate(propagateExceptions, callable);
+        if(SwingUtilities.isEventDispatchThread()) return propagate(propagateExceptions, callable);
         try {
             return new UIFuture<>(callable).get();
         }
         catch(Exception e) {
-            if(propagateExceptions) throw U.makeRuntimeException(e);
+            if(propagateExceptions) throw makeRuntimeException(e);
             return null;
         }
     }
@@ -122,8 +124,8 @@ public final class UI {
             if(SwingUtilities.isEventDispatchThread()) runnable.run();
             else SwingUtilities.invokeAndWait(() -> { try { runnable.run(); } catch(Exception e) { ex.set(e); } });
         }
-        catch(Exception e) { throw U.makeRuntimeException(e); }
-        if(ex.get() != null) throw U.makeRuntimeException(ex.get());
+        catch(Exception e) { throw makeRuntimeException(e); }
+        if(ex.get() != null) throw makeRuntimeException(ex.get());
     }
 
     public static void invokeLater(@NotNull Runnable runnable) {
