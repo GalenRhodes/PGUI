@@ -23,7 +23,6 @@ package com.projectgalen.lib.ui;
 // ===========================================================================
 
 import com.projectgalen.lib.utils.U;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,6 +36,7 @@ import java.util.TreeSet;
 
 import static com.projectgalen.lib.ui.M.msgs;
 
+@SuppressWarnings("unused")
 public final class Fonts {
 
     private Fonts() { }
@@ -45,9 +45,8 @@ public final class Fonts {
         return changeFont(font, (font.getStyle() | addStyle), font.getSize());
     }
 
-    @Contract("_, _ -> new")
-    public static @NotNull Font changeFace(@NotNull Font faceFont, @NotNull Font styleSizeFont) {
-        return new Font(faceFont.getFamily(), styleSizeFont.getStyle(), styleSizeFont.getSize());
+    public static @NotNull Font changeFace(@NotNull Font faceFont, @Nullable Font styleSizeFont) {
+        return (styleSizeFont == null) ? faceFont : new Font(faceFont.getFamily(), styleSizeFont.getStyle(), styleSizeFont.getSize());
     }
 
     public static @NotNull Font changeFont(@NotNull Font font, int style, int size) {

@@ -119,7 +119,7 @@ public abstract class BasicChooser extends JPanel implements ItemSelectable {
 
     @NotNull
     protected String[] integerRangeList(int start, int end) {
-        if(start == end) return new String[]{ String.valueOf(start) };
+        if(start == end) return new String[] { String.valueOf(start) };
 
         int     sz  = ((Math.max(start, end) - Math.min(start, end)) + 1);
         int     num = start;
@@ -129,7 +129,7 @@ public abstract class BasicChooser extends JPanel implements ItemSelectable {
 
         for(int i = 0; i < sz; i++) {
             out[i] = String.valueOf(num);
-            num = (f ? (num + 1) : (num - 1));
+            num    = (f ? (num + 1) : (num - 1));
         }
 
         return out;

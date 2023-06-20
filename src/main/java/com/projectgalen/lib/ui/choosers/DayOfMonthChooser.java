@@ -51,7 +51,7 @@ public class DayOfMonthChooser extends BasicChooser implements MonthChangedListe
     public DayOfMonthChooser(@Nullable Month month, int year, boolean noChoiceOption) {
         super(noChoiceOption);
         this.month = month;
-        this.year = year;
+        this.year  = year;
     }
 
     public Integer getDayOfMonth() {
@@ -93,7 +93,7 @@ public class DayOfMonthChooser extends BasicChooser implements MonthChangedListe
 
     public void setMonthAndYear(Month month, int year) {
         this.month = month;
-        this.year = year;
+        this.year  = year;
         fireReloadList();
     }
 

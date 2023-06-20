@@ -38,11 +38,11 @@ public class TableCellModelEvent extends EventObject {
 
     public TableCellModelEvent(@NotNull Object source, @NotNull EventType eventType, int rowIndex, int columnIndex, @Nullable Object oldValue, @Nullable Object newValue) {
         super(source);
-        this.eventType = eventType;
-        this.rowIndex = rowIndex;
+        this.eventType   = eventType;
+        this.rowIndex    = rowIndex;
         this.columnIndex = columnIndex;
-        this.oldValue = oldValue;
-        this.newValue = newValue;
+        this.oldValue    = oldValue;
+        this.newValue    = newValue;
     }
 
     @Override

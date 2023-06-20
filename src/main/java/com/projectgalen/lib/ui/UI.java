@@ -77,7 +77,19 @@ public final class UI {
 
     @Contract(value = "_, _, _, _ -> new", pure = true)
     public static @NotNull GridConstraints getHSpacerConstraints(int row, int column, int rowSpan, int colSpan) {
-        return new GridConstraints(row, column, rowSpan, colSpan, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, CANGROW_WANTGROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false);
+        return new GridConstraints(row,
+                                   column,
+                                   rowSpan,
+                                   colSpan,
+                                   GridConstraints.ANCHOR_CENTER,
+                                   GridConstraints.FILL_HORIZONTAL,
+                                   CANGROW_WANTGROW,
+                                   GridConstraints.SIZEPOLICY_FIXED,
+                                   null,
+                                   null,
+                                   null,
+                                   0,
+                                   false);
     }
 
     public static @NotNull Icon getIcon(@NotNull String name, @NotNull Class<?> referenceClass) {
@@ -94,7 +106,19 @@ public final class UI {
 
     @Contract(value = "_, _, _, _ -> new", pure = true)
     public static @NotNull GridConstraints getVSpacerConstraints(int row, int column, int rowSpan, int colSpan) {
-        return new GridConstraints(row, column, rowSpan, colSpan, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_FIXED, CANGROW_WANTGROW, null, null, null, 0, false);
+        return new GridConstraints(row,
+                                   column,
+                                   rowSpan,
+                                   colSpan,
+                                   GridConstraints.ANCHOR_CENTER,
+                                   GridConstraints.FILL_VERTICAL,
+                                   GridConstraints.SIZEPOLICY_FIXED,
+                                   CANGROW_WANTGROW,
+                                   null,
+                                   null,
+                                   null,
+                                   0,
+                                   false);
     }
 
     public static <T> @Nullable T invokeAndGet(@NotNull Callable<T> callable) {

@@ -90,48 +90,48 @@ public class CustomComponentBase {
         private final Font   dataFont;
 
         public GridDataItem(String label, int labelAnchor, @NotNull Font font, String data, int dataAnchor) {
-            this.label = label;
-            this.data = data;
+            this.label       = label;
+            this.data        = data;
             this.labelAnchor = labelAnchor;
-            this.dataAnchor = dataAnchor;
-            this.labelFont = new Font(font.getFontName(), Font.BOLD, font.getSize());
-            this.dataFont = new Font(font.getFontName(), Font.PLAIN, font.getSize());
+            this.dataAnchor  = dataAnchor;
+            this.labelFont   = new Font(font.getFontName(), Font.BOLD, font.getSize());
+            this.dataFont    = new Font(font.getFontName(), Font.PLAIN, font.getSize());
         }
 
         public GridDataItem(String label, int labelAnchor, Font labelFont, String data, int dataAnchor, Font dataFont) {
-            this.label = label;
-            this.data = data;
+            this.label       = label;
+            this.data        = data;
             this.labelAnchor = labelAnchor;
-            this.dataAnchor = dataAnchor;
-            this.labelFont = labelFont;
-            this.dataFont = dataFont;
+            this.dataAnchor  = dataAnchor;
+            this.labelFont   = labelFont;
+            this.dataFont    = dataFont;
         }
 
         public GridDataItem(String label, String data) {
-            this.label = label;
-            this.data = data;
-            this.dataAnchor = GridConstraints.ANCHOR_WEST;
+            this.label       = label;
+            this.data        = data;
+            this.dataAnchor  = GridConstraints.ANCHOR_WEST;
             this.labelAnchor = GridConstraints.ANCHOR_EAST;
-            this.labelFont = null;
-            this.dataFont = null;
+            this.labelFont   = null;
+            this.dataFont    = null;
         }
 
         public GridDataItem(String label, String data, int dataAnchor) {
-            this.label = label;
-            this.data = data;
-            this.dataAnchor = dataAnchor;
+            this.label       = label;
+            this.data        = data;
+            this.dataAnchor  = dataAnchor;
             this.labelAnchor = GridConstraints.ANCHOR_EAST;
-            this.labelFont = null;
-            this.dataFont = null;
+            this.labelFont   = null;
+            this.dataFont    = null;
         }
 
         public GridDataItem(@NotNull String label, int labelAnchor, @Nullable String data, int dataAnchor) {
-            this.label = label;
-            this.data = data;
+            this.label       = label;
+            this.data        = data;
             this.labelAnchor = labelAnchor;
-            this.dataAnchor = dataAnchor;
-            this.labelFont = null;
-            this.dataFont = null;
+            this.dataAnchor  = dataAnchor;
+            this.labelFont   = null;
+            this.dataFont    = null;
         }
 
         public String getData() {

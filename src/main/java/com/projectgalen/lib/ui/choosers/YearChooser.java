@@ -39,7 +39,7 @@ public class YearChooser extends DayInformer {
     public YearChooser(int startYear, int endYear, DayOfMonthChooser dayOfMonthChooser, boolean noChoiceOption) {
         super(dayOfMonthChooser, noChoiceOption);
         this.startYear = startYear;
-        this.endYear = endYear;
+        this.endYear   = endYear;
     }
 
     public int getEndYear() {

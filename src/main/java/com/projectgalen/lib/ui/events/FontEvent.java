@@ -33,8 +33,8 @@ public class FontEvent extends EventObject {
 
     public FontEvent(Object source, Font oldFont, Font newFont, int oldFontSizeAdjustment, int newFontSizeAdjustment) {
         super(source);
-        this.oldFont = oldFont;
-        this.newFont = newFont;
+        this.oldFont               = oldFont;
+        this.newFont               = newFont;
         this.oldFontSizeAdjustment = oldFontSizeAdjustment;
         this.newFontSizeAdjustment = newFontSizeAdjustment;
     }
