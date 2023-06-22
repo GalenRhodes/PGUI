@@ -2,6 +2,7 @@ package com.projectgalen.lib.ui.progressdialog;
 
 import com.projectgalen.lib.ui.UIButtonChoice;
 import com.projectgalen.lib.ui.errors.ProgressDialogException;
+import com.projectgalen.lib.utils.ProgressReporter;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,7 +14,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 @SuppressWarnings("unused")
-public class ProgressDialog extends JDialog {
+public class ProgressDialog extends JDialog implements ProgressReporter {
 
     protected JPanel         contentPane;
     protected JButton        buttonOK;
@@ -95,6 +96,14 @@ public class ProgressDialog extends JDialog {
 
     public void setProgressText(@NotNull String text) {
         SwingUtilities.invokeLater(() -> progressBar.setString(text));
+    }
+
+    public boolean isIndeterminate() {
+        return progressBar.isIndeterminate();
+    }
+
+    public void setIndeterminate(boolean isIndeterminate) {
+        SwingUtilities.invokeLater(() -> progressBar.setIndeterminate(isIndeterminate));
     }
 
     private void onOK() {

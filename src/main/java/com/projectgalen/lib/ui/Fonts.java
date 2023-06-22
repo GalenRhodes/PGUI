@@ -33,6 +33,8 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.projectgalen.lib.ui.M.msgs;
 
@@ -71,11 +73,12 @@ public final class Fonts {
         }/*@f1*/
     }
 
+    public static @NotNull Stream<Font> getAllFonts() {
+        return Stream.of(GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts());
+    }
+
     public static @NotNull Set<String> getFontFamilyNames() {
-        Font[]      fonts        = GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts();
-        Set<String> fontFamilies = new TreeSet<>();
-        for(Font f : fonts) fontFamilies.add(f.getFamily());
-        return fontFamilies;
+        return getAllFonts().map(Font::getFamily).collect(Collectors.toCollection(TreeSet::new));
     }
 
     public static void setBorderFonts(@Nullable Border b, @NotNull Font font) {
