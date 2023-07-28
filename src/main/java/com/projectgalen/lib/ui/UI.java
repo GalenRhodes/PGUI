@@ -31,11 +31,13 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import java.awt.*;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 
 import static com.projectgalen.lib.utils.errors.Errors.makeRuntimeException;
 import static com.projectgalen.lib.utils.errors.Errors.propagate;
@@ -167,5 +169,9 @@ public final class UI {
 
     public static void setLookAndFeel(@NotNull BuiltInLookAndFeelProfiles profile) throws UnsupportedLookAndFeelException, ReflectiveOperationException {
         UIManager.setLookAndFeel(profile.getClassName());
+    }
+
+    public static <T extends Component> @NotNull Stream<T> streamAWT(@Nullable Container c, @NotNull Class<T> cls) {
+        return ((c == null) ? Stream.empty() : Stream.of(c.getComponents()).filter(cls::isInstance).map(cls::cast));
     }
 }
