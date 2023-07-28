@@ -181,7 +181,9 @@ public final class UI {
     }
 
     private static <T extends Component> @NotNull Optional<T> _findChild(@NotNull Container parent, @NotNull Class<T> cls, @NotNull String name) {
-        Optional<T> child = streamChildren(parent, cls).filter(c -> name.equals(c.getName())).findFirst();
-        return (child.isPresent() ? child : streamChildren(parent, Container.class).map(c -> _findChild(c, cls, name)).filter(Optional::isPresent).findFirst().orElse(Optional.empty()));
+        synchronized(parent.getTreeLock()) {
+            Optional<T> child = streamChildren(parent, cls).filter(c -> name.equals(c.getName())).findFirst();
+            return (child.isPresent() ? child : streamChildren(parent, Container.class).map(c -> _findChild(c, cls, name)).filter(Optional::isPresent).findFirst().orElse(Optional.empty()));
+        }
     }
 }
