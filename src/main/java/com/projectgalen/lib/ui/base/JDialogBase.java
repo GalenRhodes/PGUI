@@ -22,6 +22,7 @@ package com.projectgalen.lib.ui.base;
 // IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 // ===========================================================================
 
+import com.projectgalen.lib.ui.annotations.RootPanel;
 import com.projectgalen.lib.ui.interfaces.DialogButtonsInterface;
 import com.projectgalen.lib.utils.PGResourceBundle;
 import com.projectgalen.lib.utils.errors.Errors;
@@ -35,11 +36,11 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.util.Objects;
 
+import static com.projectgalen.lib.utils.reflection.Reflection.callMethod;
 import static com.projectgalen.lib.utils.reflection.Reflection.getFieldValue;
-import static com.projectgalen.lib.utils.reflection.Reflection2.getFields;
+import static com.projectgalen.lib.utils.reflection.Reflection2.*;
 
 @SuppressWarnings({ "unused", "RedundantCast" })
 public abstract class JDialogBase extends JDialog {
@@ -75,17 +76,9 @@ public abstract class JDialogBase extends JDialog {
     protected void createUIComponents() { }
 
     protected @UnknownNullability JPanel getBaseContentPane() {
-        try {
-            Field contentPaneField = getClass().getDeclaredField(CONTENT_PANE_FIELD_NAME);
-            contentPaneField.setAccessible(true);
-            return (JPanel)contentPaneField.get(this);
-        }
-        catch(IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-        catch(NoSuchFieldException e) {
-            throw new RuntimeException(msgs.format("msg.err.no_content_pane_field", CONTENT_PANE_FIELD_NAME, JPanel.class.getName()), e);
-        }
+        Class<? extends JDialogBase> c = getClass();
+        Class<RootPanel>             a = RootPanel.class;
+        return (JPanel)getAnnotatedFields(c, a).findFirst().map(f -> getFieldValue(f, this)).orElseGet(() -> getAnnotatedMethods(c, a).findFirst().map(m -> callMethod(m, this)).orElse(null));
     }
 
     protected void onCancel() {
@@ -96,7 +89,9 @@ public abstract class JDialogBase extends JDialog {
         setCodeAndExit(1);
     }
 
-    protected void preSetup() { }
+    protected void postSetup() { }
+
+    protected void preSetup()  { }
 
     protected void setCodeAndExit(int exitCode) {
         this.exitCode = exitCode;
@@ -125,6 +120,7 @@ public abstract class JDialogBase extends JDialog {
         });
         dlg.preSetup();
         dlg.setup(args);
+        dlg.postSetup();
         dlg.pack();
         dlg.setResizable(false);
         dlg.setLocationRelativeTo(owner);
