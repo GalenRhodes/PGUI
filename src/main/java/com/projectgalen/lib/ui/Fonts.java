@@ -65,12 +65,12 @@ public final class Fonts {
     }
 
     public static @NotNull String fontStyleName(@NotNull Font font) {
-        switch (font.getStyle()) {/*@f0*/
-            case Font.PLAIN:  return msgs.getString("font.style.plain");
-            case Font.BOLD:   return msgs.getString("font.style.bold");
-            case Font.ITALIC: return msgs.getString("font.style.italic");
-            default:          return msgs.getString("font.style.bold_italic");
-        }/*@f1*/
+        return switch(font.getStyle()) {/*@f0*/
+            case Font.PLAIN  -> msgs.getString("font.style.plain");
+            case Font.BOLD   -> msgs.getString("font.style.bold");
+            case Font.ITALIC -> msgs.getString("font.style.italic");
+            default          -> msgs.getString("font.style.bold_italic");
+        };/*@f1*/
     }
 
     public static @NotNull Stream<Font> getAllFonts() {
@@ -83,12 +83,10 @@ public final class Fonts {
 
     public static void setBorderFonts(@Nullable Border b, @NotNull Font font) {
         if(b != null) {
-            if(b instanceof TitledBorder) {
-                TitledBorder titledBorder = (TitledBorder)b;
-                titledBorder.setTitleFont(changeFace(font, titledBorder.getTitleFont()));
+            if(b instanceof TitledBorder tb) {
+                tb.setTitleFont(changeFace(font, tb.getTitleFont()));
             }
-            else if(b instanceof CompoundBorder) {
-                CompoundBorder cb = (CompoundBorder)b;
+            else if(b instanceof CompoundBorder cb) {
                 setBorderFonts(cb.getInsideBorder(), font);
                 setBorderFonts(cb.getOutsideBorder(), font);
             }
@@ -96,15 +94,9 @@ public final class Fonts {
     }
 
     public static void setFonts(@NotNull Component c, @NotNull Font font, String... menuItemsToIgnore) {
-        if(c instanceof Container) {
-            for(Component cc : ((Container)c).getComponents()) setFonts(cc, font, menuItemsToIgnore);
-        }
-        if(c instanceof JComponent) {
-            setBorderFonts(((JComponent)c).getBorder(), font);
-        }
-        if(c instanceof JMenu) {
-            setMenuFonts((JMenu)c, font, menuItemsToIgnore);
-        }
+        if(c instanceof Container cp) UI.forEachChild(cp, (cc, stop) -> setFonts(cc, font, menuItemsToIgnore));
+        if(c instanceof JComponent jc) setBorderFonts(jc.getBorder(), font);
+        if(c instanceof JMenu jm) setMenuFonts(jm, font, menuItemsToIgnore);
         c.setFont(changeFace(font, c.getFont()));
     }
 
