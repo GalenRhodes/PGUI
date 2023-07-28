@@ -60,6 +60,10 @@ public final class UI {
         return ((parent == null) ? null : _findChild(parent, cls, name).orElse(null));
     }
 
+    public static <T extends Component> @Nullable T findChild(@Nullable Container parent, @NotNull Class<T> cls) {
+        return ((parent == null) ? null : _findChild(parent, cls, null).orElse(null));
+    }
+
     public static <T extends Component> void forEachChild(@Nullable Container parent, @NotNull Class<T> cls, @NotNull String name, boolean deep, @NotNull BiConsumer<T, BooleanRef> consumer) {
         if(parent != null) forEachChild(parent, cls, name, deep, new BooleanRef(false), consumer);
     }
@@ -218,9 +222,9 @@ public final class UI {
         return ((c == null) ? Stream.empty() : Stream.of(c.getComponents()).filter(cls::isInstance).map(cls::cast));
     }
 
-    private static <T extends Component> @NotNull Optional<T> _findChild(@NotNull Container parent, @NotNull Class<T> cls, @NotNull String name) {
+    private static <T extends Component> @NotNull Optional<T> _findChild(@NotNull Container parent, @NotNull Class<T> cls, @Nullable String name) {
         synchronized(parent.getTreeLock()) {
-            Optional<T> child = streamChildren(parent, cls).filter(c -> name.equals(c.getName())).findFirst();
+            Optional<T> child = streamChildren(parent, cls).filter(c -> ((name == null) || name.equals(c.getName()))).findFirst();
             return (child.isPresent() ? child : streamChildren(parent, Container.class).map(c -> _findChild(c, cls, name)).filter(Optional::isPresent).findFirst().orElse(Optional.empty()));
         }
     }
