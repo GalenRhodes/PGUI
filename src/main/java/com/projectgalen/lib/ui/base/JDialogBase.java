@@ -46,9 +46,12 @@ import static com.projectgalen.lib.utils.reflection.Reflection2.*;
 public abstract class JDialogBase extends JDialog {
 
     public static final String CONTENT_PANE_FIELD_NAME = "contentPane";
+    public static final int    NO_BUTTON               = 0;
+    public static final int    OK_BUTTON               = 1;
+    public static final int    CANCEL_BUTTON           = -1;
 
     protected final PGResourceBundle msgs;
-    protected       int              exitCode = 0;
+    protected       int              exitCode = NO_BUTTON;
 
     protected JDialogBase(@NotNull String titleKey, @NotNull PGResourceBundle msgs) {
         super();
@@ -82,11 +85,11 @@ public abstract class JDialogBase extends JDialog {
     }
 
     protected void onCancel() {
-        setCodeAndExit(-1);
+        setCodeAndExit(CANCEL_BUTTON);
     }
 
     protected void onOK() {
-        setCodeAndExit(1);
+        setCodeAndExit(OK_BUTTON);
     }
 
     protected void postSetup() { }
