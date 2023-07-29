@@ -36,4 +36,18 @@ public interface DialogButtonsInterface {
     JButton getButtonCancel();
 
     JButton getButtonOK();
+
+    JPanel getDialogButtonsPanel();
+
+    boolean isCancelButtonEnabled();
+
+    boolean isOKButtonEnabled();
+
+    void removeCancelButtonListener(@NotNull ActionListener listener);
+
+    void removeOKButtonListener(@NotNull ActionListener listener);
+
+    void setCancelButtonEnabled(boolean enabled);
+
+    void setOKButtonEnabled(boolean enabled);
 }
