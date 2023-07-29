@@ -133,9 +133,9 @@ public abstract class JDialogBase extends JDialog {
 
     private static <T extends JDialogBase> @NotNull T create(@NotNull Class<T> dialogClass, @Nullable Component owner, @NotNull String titleKey, @NotNull PGResourceBundle msgs) {
         try {
-            if(owner instanceof Dialog) return newInstance(dialogClass.getDeclaredConstructor(Dialog.class, String.class), (Dialog)owner, titleKey, msgs);
-            if(owner instanceof Frame) return newInstance(dialogClass.getDeclaredConstructor(Frame.class, String.class), (Frame)owner, titleKey, msgs);
-            return newInstance(dialogClass.getDeclaredConstructor(String.class), titleKey, msgs);
+            if(owner instanceof Dialog) return newInstance(dialogClass.getDeclaredConstructor(Dialog.class, String.class, PGResourceBundle.class), (Dialog)owner, titleKey, msgs);
+            if(owner instanceof Frame) return newInstance(dialogClass.getDeclaredConstructor(Frame.class, String.class, PGResourceBundle.class), (Frame)owner, titleKey, msgs);
+            return newInstance(dialogClass.getDeclaredConstructor(String.class, PGResourceBundle.class), titleKey, msgs);
         }
         catch(Exception e) { throw Errors.makeRuntimeException(e); }
     }
