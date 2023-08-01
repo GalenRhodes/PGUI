@@ -94,7 +94,7 @@ public final class Fonts {
     }
 
     public static void setFonts(@NotNull Component c, @NotNull Font font, String... menuItemsToIgnore) {
-        if(c instanceof Container cp) UI.forEachChild(cp, (cc, stop) -> setFonts(cc, font, menuItemsToIgnore));
+        if(c instanceof Container cp) UIStream.withChildStream(cp, Component.class, s -> s.forEach(cx -> setFonts(cx, font, menuItemsToIgnore)));
         if(c instanceof JComponent jc) setBorderFonts(jc.getBorder(), font);
         if(c instanceof JMenu jm) setMenuFonts(jm, font, menuItemsToIgnore);
         c.setFont(changeFace(font, c.getFont()));

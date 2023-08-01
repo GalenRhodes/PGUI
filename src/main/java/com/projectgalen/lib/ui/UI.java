@@ -25,22 +25,17 @@ package com.projectgalen.lib.ui;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.projectgalen.lib.ui.enums.BuiltInLookAndFeelProfiles;
-import com.projectgalen.lib.utils.refs.BooleanRef;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import java.awt.*;
 import java.io.IOException;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiConsumer;
-import java.util.stream.Stream;
 
 import static com.projectgalen.lib.utils.errors.Errors.makeRuntimeException;
 import static com.projectgalen.lib.utils.errors.Errors.propagate;
@@ -51,50 +46,6 @@ public final class UI {
     public static final int CANGROW_CANSHRINK = (GridConstraints.SIZEPOLICY_CAN_GROW | GridConstraints.SIZEPOLICY_CAN_SHRINK);
 
     private UI() { }
-
-    public static @Nullable Component findChild(@Nullable Container parent, @NotNull String name) {
-        return findChild(parent, Component.class, name);
-    }
-
-    public static <T extends Component> @Nullable T findChild(@Nullable Container parent, @NotNull Class<T> cls, @NotNull String name) {
-        return ((parent == null) ? null : _findChild(parent, cls, name).orElse(null));
-    }
-
-    public static <T extends Component> @Nullable T findChild(@Nullable Container parent, @NotNull Class<T> cls) {
-        return ((parent == null) ? null : _findChild(parent, cls, null).orElse(null));
-    }
-
-    public static <T extends Component> void forEachChild(@Nullable Container parent, @NotNull Class<T> cls, @NotNull String name, boolean deep, @NotNull BiConsumer<T, BooleanRef> consumer) {
-        if(parent != null) forEachChild(parent, cls, name, deep, new BooleanRef(false), consumer);
-    }
-
-    public static <T extends Component> void forEachChild(@Nullable Container parent, @NotNull Class<T> cls, @NotNull String name, @NotNull BiConsumer<T, BooleanRef> consumer) {
-        if(parent != null) forEachChild(parent, cls, name, true, new BooleanRef(false), consumer);
-    }
-
-    public static void forEachChild(@Nullable Container parent, @NotNull String name, boolean deep, @NotNull BiConsumer<Component, BooleanRef> consumer) {
-        if(parent != null) forEachChild(parent, Component.class, name, deep, new BooleanRef(false), consumer);
-    }
-
-    public static void forEachChild(@Nullable Container parent, @NotNull String name, @NotNull BiConsumer<Component, BooleanRef> consumer) {
-        if(parent != null) forEachChild(parent, Component.class, name, true, new BooleanRef(false), consumer);
-    }
-
-    public static void forEachChild(@Nullable Container parent, boolean deep, @NotNull BiConsumer<Component, BooleanRef> consumer) {
-        if(parent != null) forEachChild(parent, Component.class, null, deep, new BooleanRef(false), consumer);
-    }
-
-    public static void forEachChild(@Nullable Container parent, @NotNull BiConsumer<Component, BooleanRef> consumer) {
-        if(parent != null) forEachChild(parent, Component.class, null, true, new BooleanRef(false), consumer);
-    }
-
-    public static <T extends Component> void forEachChild(@Nullable Container parent, @NotNull Class<T> cls, boolean deep, @NotNull BiConsumer<T, BooleanRef> consumer) {
-        if(parent != null) forEachChild(parent, cls, null, deep, new BooleanRef(false), consumer);
-    }
-
-    public static <T extends Component> void forEachChild(@Nullable Container parent, @NotNull Class<T> cls, @NotNull BiConsumer<T, BooleanRef> consumer) {
-        if(parent != null) forEachChild(parent, cls, null, true, new BooleanRef(false), consumer);
-    }
 
     @Contract(value = "_, _ -> new", pure = true)
     public static @NotNull GridConstraints getGridConstraints(int row, int column) {
@@ -216,35 +167,5 @@ public final class UI {
 
     public static void setLookAndFeel(@NotNull BuiltInLookAndFeelProfiles profile) throws UnsupportedLookAndFeelException, ReflectiveOperationException {
         UIManager.setLookAndFeel(profile.getClassName());
-    }
-
-    public static <T extends Component> @NotNull Stream<T> streamChildren(@Nullable Container c, @NotNull Class<T> cls) {
-        return ((c == null) ? Stream.empty() : Stream.of(c.getComponents()).filter(cls::isInstance).map(cls::cast));
-    }
-
-    private static <T extends Component> @NotNull Optional<T> _findChild(@NotNull Container parent, @NotNull Class<T> cls, @Nullable String name) {
-        synchronized(parent.getTreeLock()) {
-            Optional<T> child = streamChildren(parent, cls).filter(c -> ((name == null) || name.equals(c.getName()))).findFirst();
-            return (child.isPresent() ? child : streamChildren(parent, Container.class).map(c -> _findChild(c, cls, name)).filter(Optional::isPresent).findFirst().orElse(Optional.empty()));
-        }
-    }
-
-    private static <T extends Component> void forEachChild(@NotNull Container parent, @NotNull Class<T> cls, @Nullable String name, boolean deep, BooleanRef stop, @NotNull BiConsumer<T, BooleanRef> consumer) {
-        synchronized(parent.getTreeLock()) {
-            for(Component child : parent.getComponents()) {
-                if(cls.isInstance(child) && ((name == null) || name.equals(child.getName()))) {
-                    consumer.accept(cls.cast(child), stop);
-                    if(stop.value) break;
-                }
-            }
-            if(deep && !stop.value) {
-                for(Component child : parent.getComponents()) {
-                    if(child instanceof Container c) {
-                        forEachChild(c, cls, name, true, stop, consumer);
-                        if(stop.value) break;
-                    }
-                }
-            }
-        }
     }
 }
