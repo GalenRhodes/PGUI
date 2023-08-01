@@ -1,4 +1,4 @@
-package com.projectgalen.app.pgbudget.ui.dialogs;
+package com.projectgalen.lib.ui.dialogs;
 
 import com.projectgalen.lib.ui.M;
 import com.projectgalen.lib.ui.UIStream;

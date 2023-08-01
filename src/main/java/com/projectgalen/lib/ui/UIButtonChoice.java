@@ -23,5 +23,5 @@ package com.projectgalen.lib.ui;
 // ===========================================================================
 
 public enum UIButtonChoice {
-    None, OK
+    None, OK, Cancel
 }

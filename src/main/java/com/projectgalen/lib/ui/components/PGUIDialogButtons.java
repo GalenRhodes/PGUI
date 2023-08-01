@@ -1,8 +1,8 @@
-package com.projectgalen.app.pgbudget.ui.components;
+package com.projectgalen.lib.ui.components;
 
 // ===========================================================================
 //     PROJECT: PGBudget
-//    FILENAME: DialogButtons.java
+//    FILENAME: PGUIDialogButtons.java
 //         IDE: IntelliJ IDEA
 //      AUTHOR: Galen Rhodes
 //        DATE: May 09, 2023
@@ -29,12 +29,12 @@ import javax.swing.*;
 import java.awt.event.ActionListener;
 
 @SuppressWarnings("unused")
-public class DialogButtons implements DialogButtonsInterface {
+public class PGUIDialogButtons implements DialogButtonsInterface {
     protected JButton buttonOK;
     protected JButton buttonCancel;
     protected JPanel  dialogButtonsPanel;
 
-    public DialogButtons() { }
+    public PGUIDialogButtons() { }
 
     public void addCancelButtonListener(@NotNull ActionListener listener) {
         buttonCancel.addActionListener(listener);
