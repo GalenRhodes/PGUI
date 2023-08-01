@@ -6,6 +6,7 @@ import com.projectgalen.lib.ui.annotations.RootPanel;
 import com.projectgalen.lib.ui.base.JDialogBase;
 import com.projectgalen.lib.ui.components.PGUIComboBox;
 import com.projectgalen.lib.ui.interfaces.DialogButtonsInterface;
+import com.projectgalen.lib.utils.Dates;
 import com.projectgalen.lib.utils.PGCalendar;
 import com.projectgalen.lib.utils.PGResourceBundle;
 import com.projectgalen.lib.utils.Streams;
@@ -31,21 +32,23 @@ import java.util.function.BiFunction;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
+@SuppressWarnings("unused")
 public class CalendarDialog extends JDialogBase {
-    public static final         Color        COLOR_BG_MARKED    = Objects.requireNonNullElse(UIManager.getColor("Menu.selectionBackground"), Color.BLUE);
-    public static final         Color        COLOR_BG_MOUSEOVER = Color.LIGHT_GRAY;
-    public static final         Color        COLOR_FG_MOUSEOVER = Color.BLACK;
-    public static final         Color        COLOR_FG_NORMAL    = Color.BLACK;
-    public static final         Color        COLOR_BG_NORMAL    = Color.WHITE;
-    public static final         Color        COLOR_FG_MARKED    = Objects.requireNonNullElse(UIManager.getColor("Menu.selectionForeground"), Color.WHITE);
-    public static final         Cursor       CURSOR_DEF         = new Cursor(Cursor.DEFAULT_CURSOR);
-    public static final         Cursor       CURSOR_HAND        = new Cursor(Cursor.HAND_CURSOR);
-    public static final         List<String> MONTHS             = M.msgs.getStringList("month.values");
-    public static final @RegExp String       RX1                = "w\\d+";
-    public static final @RegExp String       RX2                = "[wc]\\d+";
-    public static final @RegExp String       RX3                = "c\\d+";
+    public static final Color COLOR_BG_MOUSEOVER = Color.LIGHT_GRAY;
+    public static final Color COLOR_FG_MOUSEOVER = Color.BLACK;
+    public static final Color COLOR_BG_NORMAL    = Color.WHITE;
+    public static final Color COLOR_FG_NORMAL    = Color.BLACK;
+    public static final Color COLOR_BG_MARKED    = Objects.requireNonNullElse(UIManager.getColor("Menu.selectionBackground"), Color.BLUE);
+    public static final Color COLOR_FG_MARKED    = Objects.requireNonNullElse(UIManager.getColor("Menu.selectionForeground"), Color.WHITE);
 
-    private static final SimpleDateFormat DATE_FMT = new SimpleDateFormat("EEEE, MMMM d, yyyy");
+    private static final         SimpleDateFormat DATE_FMT1   = new SimpleDateFormat("EEEE, MMMM d, yyyy");
+    private static final         SimpleDateFormat DATE_FMT2   = new SimpleDateFormat("MMMM yyyy");
+    private static final         Cursor           CURSOR_DEF  = new Cursor(Cursor.DEFAULT_CURSOR);
+    private static final         Cursor           CURSOR_HAND = new Cursor(Cursor.HAND_CURSOR);
+    private static final         List<String>     MONTHS      = M.msgs.getStringList("month.values");
+    private static final @RegExp String           RX1         = "w\\d+";
+    private static final @RegExp String           RX2         = "c\\d+";
+    private static final @RegExp String           RX3         = "[wc]\\d+";
 
     protected @RootPanel JPanel                 contentPane;
     protected            DialogButtonsInterface dialogButtons;
@@ -54,10 +57,12 @@ public class CalendarDialog extends JDialogBase {
     protected            JButton                buttonNext;
     protected            PGUIComboBox<Integer>  fieldMonths;
     protected            PGUIComboBox<Integer>  fieldYears;
+    protected final      MouseListener          mouseListener = new CalendarMouseListener();
     protected            int                    storedMonth   = 0;
     protected            int                    storedDate    = 1;
     protected            int                    storedYear    = PGCalendar.getInstance().getYear();
-    protected final      MouseListener          mouseListener = new CalendarMouseListener();
+    protected            int                    minYear;
+    protected            int                    maxYear;
 
     protected CalendarDialog(@NotNull String titleKey, @NotNull PGResourceBundle msgs) {
         super(titleKey, msgs);
@@ -80,13 +85,11 @@ public class CalendarDialog extends JDialogBase {
         int        endYear   = (Integer)args[1];
         PGCalendar initDate  = PGCalendar.toCalendar(Objects.requireNonNullElseGet((Date)args[2], Date::new));
 
-        int minYear = Math.min(startYear, endYear);
-        int maxYear = Math.max(startYear, endYear);
+        minYear = Math.min(startYear, endYear);
+        maxYear = Math.max(startYear, endYear);
         if(initDate.getYear() < minYear || initDate.getYear() > maxYear) throw new IllegalArgumentException(msgs.format("msg.err.bad_year_for_initial_date", initDate, minYear, maxYear));
 
-        storedMonth = initDate.getMonth();
-        storedYear  = initDate.getYear();
-        storedDate  = initDate.getDate();
+        storeDate(initDate);
 
         fieldMonths.setOptional(false);
         fieldMonths.setData(IntStream.range(0, MONTHS.size()).boxed().toList(), MONTHS::get);
@@ -96,14 +99,14 @@ public class CalendarDialog extends JDialogBase {
         fieldYears.setSelectedItem(storedYear);
         fieldMonths.addItemListener(e -> onMonthChanged());
         fieldYears.addItemListener(e -> onYearChanged());
-
+        buttonNext.addActionListener(e -> incMonth(1));
+        buttonPrev.addActionListener(e -> incMonth(-1));
         SwingUtilities.invokeLater(() -> {
             Dimension maxSize = new Dimension();
             withPanelLabel(RX1, (p, l) -> getMaxSize(maxSize, p.getPreferredSize()));
-            withPanelLabel(RX2, (p, l) -> p.setMinimumSize(maxSize));
+            withPanelLabel(RX3, (p, l) -> p.setMinimumSize(maxSize));
             pack();
         });
-
         updateUI();
     }
 
@@ -137,7 +140,7 @@ public class CalendarDialog extends JDialogBase {
     }
 
     private int getSelectedDayOfMonth() {
-        return Objects.requireNonNullElse(fromPanelLabel(RX3, (p, l) -> parseLabelDate(l)), storedDate);
+        return Objects.requireNonNullElse(fromPanelLabel(RX2, (p, l) -> parseLabelDate(l)), storedDate);
     }
 
     private int getSelectedMonth() {
@@ -148,13 +151,25 @@ public class CalendarDialog extends JDialogBase {
         return Objects.requireNonNullElse(fieldYears.getSelectedItem(), storedYear);
     }
 
+    private void incMonth(int inc) {
+        PGCalendar c = new PGCalendar(storedYear, storedMonth, storedDate).addMonths(inc);
+        if((c.getYear() >= minYear) && (c.getYear() <= maxYear)) {
+            storeDate(c);
+            updateUI();
+        }
+    }
+
     private void onMonthChanged() {
         storedMonth = Objects.requireNonNullElse(fieldMonths.getSelectedItem(), 0);
+        int mx = Dates.daysInMonth(storedMonth, storedYear);
+        if(storedDate > mx) storedDate = mx;
         updateUI();
     }
 
     private void onYearChanged() {
         storedYear = Objects.requireNonNullElse(fieldYears.getSelectedItem(), fieldYears.getData().get(0));
+        int mx = Dates.daysInMonth(storedMonth, storedYear);
+        if(storedDate > mx) storedDate = mx;
         updateUI();
     }
 
@@ -173,19 +188,33 @@ public class CalendarDialog extends JDialogBase {
         });
     }
 
+    private void storeDate(@NotNull PGCalendar date) {
+        storedMonth = date.getMonth();
+        storedYear  = date.getYear();
+        storedDate  = date.getDate();
+    }
+
     private void updateUI() {
         SwingUtilities.invokeLater(() -> {
-            PGCalendar cal = new PGCalendar(storedYear, storedMonth, 1);
-            int        dm  = storedDate;
-            int        wd  = (cal.getDayOfWeek() - 1);
-            int        dc  = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
-            int        idx = 0;
+            PGCalendar cal       = new PGCalendar(storedYear, storedMonth, 1);
+            PGCalendar nextMonth = new PGCalendar(storedYear, storedMonth, 1).addMonths(1);
+            PGCalendar prevMonth = new PGCalendar(storedYear, storedMonth, 1).addMonths(-1);
+            int        wd        = (cal.getDayOfWeek() - 1);
+            int        dc        = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+            int        ix        = 0;
+
+            buttonNext.setToolTipText(DATE_FMT2.format(nextMonth.getTime()));
+            buttonPrev.setToolTipText(DATE_FMT2.format(prevMonth.getTime()));
+            buttonNext.setEnabled(nextMonth.getYear() <= maxYear);
+            buttonPrev.setEnabled(prevMonth.getYear() >= minYear);
 
             fieldMonths.setSelectedItem(storedMonth);
             fieldYears.setSelectedItem(storedYear);
-            while(idx < wd) setLabel(idx++, " ", null, COLOR_BG_NORMAL, COLOR_FG_NORMAL, false);
-            for(int dt = 1; dt <= dc; dt++) setLabel(idx++, String.valueOf(dt), DATE_FMT.format(cal.setDate(dt).toSQLDate()), getBgColor((dt == dm)), getFgColor((dt == dm)), true);
-            while(idx < 42) setLabel(idx++, " ", null, COLOR_BG_NORMAL, COLOR_FG_NORMAL, false);
+
+            while(ix < wd) setLabel(ix++, " ", null, COLOR_BG_NORMAL, COLOR_FG_NORMAL, false);
+            for(int dt = 1; dt <= dc; dt++) setLabel(ix++, String.valueOf(dt), DATE_FMT1.format(cal.setDate(dt).toSQLDate()), getBgColor((dt == storedDate)), getFgColor((dt == storedDate)), true);
+            while(ix < 42) setLabel(ix++, " ", null, COLOR_BG_NORMAL, COLOR_FG_NORMAL, false);
+            calendarPanel.repaint();
         });
     }
 
