@@ -1,7 +1,7 @@
 package com.projectgalen.lib.ui.listeners;
 
 // ===========================================================================
-//     PROJECT: PGBudget
+//     PROJECT: PGUI
 //    FILENAME: TableCellModelListener.java
 //         IDE: IntelliJ IDEA
 //      AUTHOR: Galen Rhodes

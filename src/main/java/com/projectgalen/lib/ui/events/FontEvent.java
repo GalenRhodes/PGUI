@@ -1,7 +1,7 @@
 package com.projectgalen.lib.ui.events;
 
 // ===========================================================================
-//     PROJECT: PGBudget
+//     PROJECT: PGUI
 //    FILENAME: FontEvent.java
 //         IDE: IntelliJ IDEA
 //      AUTHOR: Galen Rhodes

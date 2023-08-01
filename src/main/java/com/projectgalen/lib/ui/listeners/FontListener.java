@@ -1,7 +1,7 @@
 package com.projectgalen.lib.ui.listeners;
 
 // ===========================================================================
-//     PROJECT: PGBudget
+//     PROJECT: PGUI
 //    FILENAME: FontListener.java
 //         IDE: IntelliJ IDEA
 //      AUTHOR: Galen Rhodes

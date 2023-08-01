@@ -1,7 +1,7 @@
 package com.projectgalen.lib.ui.errors;
 
 // ===========================================================================
-//     PROJECT: PGBudget
+//     PROJECT: PGUI
 //    FILENAME: ProgressDialogException.java
 //         IDE: IntelliJ IDEA
 //      AUTHOR: Galen Rhodes

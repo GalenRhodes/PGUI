@@ -1,7 +1,7 @@
 package com.projectgalen.lib.ui.base;
 
 // ===========================================================================
-//     PROJECT: PGBudget
+//     PROJECT: PGUI
 //    FILENAME: JDialogBase.java
 //         IDE: IntelliJ IDEA
 //      AUTHOR: Galen Rhodes

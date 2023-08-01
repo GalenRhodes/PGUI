@@ -1,7 +1,7 @@
 package com.projectgalen.lib.ui.interfaces;
 
 // ===========================================================================
-//     PROJECT: PGBudget
+//     PROJECT: PGUI
 //    FILENAME: AbstractListCellRenderer.java
 //         IDE: IntelliJ IDEA
 //      AUTHOR: Galen Rhodes

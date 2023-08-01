@@ -1,7 +1,7 @@
 package com.projectgalen.lib.ui.components;
 
 // ===========================================================================
-//     PROJECT: PGBudget
+//     PROJECT: PGUI
 //    FILENAME: PGUIDialogButtons.java
 //         IDE: IntelliJ IDEA
 //      AUTHOR: Galen Rhodes
