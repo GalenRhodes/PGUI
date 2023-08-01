@@ -851,7 +851,7 @@
                     </constraints>
                     <properties>
                       <font style="1"/>
-                      <text value="Su"/>
+                      <text resource-bundle="com/projectgalen/lib/ui/messages" key="txt.weekday.short.sunday"/>
                     </properties>
                   </component>
                 </children>
@@ -874,7 +874,7 @@
                     </constraints>
                     <properties>
                       <font style="1"/>
-                      <text value="Mo"/>
+                      <text resource-bundle="com/projectgalen/lib/ui/messages" key="txt.weekday.short.monday"/>
                     </properties>
                   </component>
                 </children>
@@ -897,7 +897,7 @@
                     </constraints>
                     <properties>
                       <font style="1"/>
-                      <text value="Tu"/>
+                      <text resource-bundle="com/projectgalen/lib/ui/messages" key="txt.weekday.short.tuesday"/>
                     </properties>
                   </component>
                 </children>
@@ -920,7 +920,7 @@
                     </constraints>
                     <properties>
                       <font style="1"/>
-                      <text value="We"/>
+                      <text resource-bundle="com/projectgalen/lib/ui/messages" key="txt.weekday.short.wednesday"/>
                     </properties>
                   </component>
                 </children>
@@ -943,7 +943,7 @@
                     </constraints>
                     <properties>
                       <font style="1"/>
-                      <text value="Th"/>
+                      <text resource-bundle="com/projectgalen/lib/ui/messages" key="txt.weekday.short.thursday"/>
                     </properties>
                   </component>
                 </children>
@@ -966,7 +966,7 @@
                     </constraints>
                     <properties>
                       <font style="1"/>
-                      <text value="Fr"/>
+                      <text resource-bundle="com/projectgalen/lib/ui/messages" key="txt.weekday.short.friday"/>
                     </properties>
                   </component>
                 </children>
@@ -989,7 +989,7 @@
                     </constraints>
                     <properties>
                       <font style="1"/>
-                      <text value="Sa"/>
+                      <text resource-bundle="com/projectgalen/lib/ui/messages" key="txt.weekday.short.saturday"/>
                     </properties>
                   </component>
                 </children>
