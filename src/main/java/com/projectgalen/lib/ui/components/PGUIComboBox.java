@@ -110,13 +110,23 @@ public class PGUIComboBox<T> {
 
     public void setSelectedIndex(int index) {
         isSettingSelected = true;
-        try { comboBox.setSelectedIndex(index); } finally { isSettingSelected = false; }
+        try {
+            comboBox.setSelectedIndex(index);
+        }
+        finally {
+            isSettingSelected = false;
+        }
         comboBox.repaint();
     }
 
     public void setSelectedItem(T item) {
         isSettingSelected = true;
-        try { comboBox.setSelectedItem(item); } finally { isSettingSelected = false; }
+        try {
+            comboBox.setSelectedItem(item);
+        }
+        finally {
+            isSettingSelected = false;
+        }
         comboBox.repaint();
     }
 

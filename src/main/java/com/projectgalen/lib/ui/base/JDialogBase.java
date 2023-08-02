@@ -42,7 +42,7 @@ import static com.projectgalen.lib.utils.reflection.Reflection.callMethod;
 import static com.projectgalen.lib.utils.reflection.Reflection.getFieldValue;
 import static com.projectgalen.lib.utils.reflection.Reflection2.*;
 
-@SuppressWarnings({ "unused", "RedundantCast" })
+@SuppressWarnings({ "unused", "RedundantCast", "SameParameterValue" })
 public abstract class JDialogBase extends JDialog {
 
     public static final String CONTENT_PANE_FIELD_NAME = "contentPane";
@@ -102,7 +102,11 @@ public abstract class JDialogBase extends JDialog {
     }
 
     protected void showErrorMessage(@NotNull String titleKey, @NotNull String messageKey) {
-        JOptionPane.showMessageDialog(this, msgs.getString(messageKey), msgs.getString(titleKey), JOptionPane.ERROR_MESSAGE);
+        showMessage(titleKey, msgs.getString(messageKey), JOptionPane.ERROR_MESSAGE);
+    }
+
+    protected void showMessage(@NotNull String titleKey, String message, int type) {
+        JOptionPane.showMessageDialog(this, message, msgs.getString(titleKey), type);
     }
 
     public static <T extends JDialogBase> @NotNull T create(@NotNull Class<T> dialogClass, @Nullable Component owner, @NotNull String titleKey, @NotNull PGResourceBundle msgs, Object @NotNull ... args) {

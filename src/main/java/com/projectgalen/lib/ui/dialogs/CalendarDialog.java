@@ -10,6 +10,8 @@ import com.projectgalen.lib.utils.Dates;
 import com.projectgalen.lib.utils.PGCalendar;
 import com.projectgalen.lib.utils.PGResourceBundle;
 import com.projectgalen.lib.utils.Streams;
+import com.projectgalen.lib.utils.enums.Month;
+import com.projectgalen.lib.utils.refs.IntegerRef;
 import org.intellij.lang.annotations.Language;
 import org.intellij.lang.annotations.RegExp;
 import org.jetbrains.annotations.NonNls;
@@ -83,7 +85,7 @@ public class CalendarDialog extends JDialogBase {
     public @Override void setup(Object @NotNull ... args) {
         int        startYear = (Integer)args[0];
         int        endYear   = (Integer)args[1];
-        PGCalendar initDate  = PGCalendar.toCalendar(Objects.requireNonNullElseGet((Date)args[2], Date::new));
+        PGCalendar initDate  = ((args[2] == null) ? new PGCalendar(startYear, Month.JANUARY, 1) : PGCalendar.toCalendar((Date)args[2]));
 
         minYear = Math.min(startYear, endYear);
         maxYear = Math.max(startYear, endYear);
@@ -161,14 +163,14 @@ public class CalendarDialog extends JDialogBase {
 
     private void onMonthChanged() {
         storedMonth = Objects.requireNonNullElse(fieldMonths.getSelectedItem(), 0);
-        int mx = Dates.daysInMonth(storedMonth, storedYear);
+        int mx = Dates.daysInMonth(storedMonth + 1, storedYear);
         if(storedDate > mx) storedDate = mx;
         updateUI();
     }
 
     private void onYearChanged() {
         storedYear = Objects.requireNonNullElse(fieldYears.getSelectedItem(), fieldYears.getData().get(0));
-        int mx = Dates.daysInMonth(storedMonth, storedYear);
+        int mx = Dates.daysInMonth(storedMonth + 1, storedYear);
         if(storedDate > mx) storedDate = mx;
         updateUI();
     }
@@ -233,8 +235,13 @@ public class CalendarDialog extends JDialogBase {
     }
 
     public static @Nullable Date execute(@Nullable Component owner, int startYear, int endYear, @Nullable Date date) {
+        return execute(owner, startYear, endYear, date, new IntegerRef(0));
+    }
+
+    public static @Nullable Date execute(@Nullable Component owner, int startYear, int endYear, @Nullable Date date, @NotNull IntegerRef buttonChoiceRef) {
         CalendarDialog dlg = CalendarDialog.create(CalendarDialog.class, owner, "dlg.title.calendar", M.msgs, startYear, endYear, date);
-        return ((dlg.getExitCode() == OK_BUTTON) ? dlg.getDate() : null);
+        buttonChoiceRef.value = dlg.getExitCode();
+        return ((buttonChoiceRef.value == OK_BUTTON) ? dlg.getDate() : null);
     }
 
     private final class CalendarMouseListener extends MouseAdapter {
