@@ -23,12 +23,12 @@ package com.projectgalen.lib.ui.base;
 // ===========================================================================
 
 import com.projectgalen.lib.ui.annotations.RootPanel;
+import com.projectgalen.lib.ui.interfaces.CustomComponent;
 import com.projectgalen.lib.ui.interfaces.DialogButtonsInterface;
 import com.projectgalen.lib.utils.PGResourceBundle;
 import com.projectgalen.lib.utils.errors.Errors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnknownNullability;
 
 import javax.swing.*;
 import java.awt.*;
@@ -43,7 +43,7 @@ import static com.projectgalen.lib.utils.reflection.Reflection.getFieldValue;
 import static com.projectgalen.lib.utils.reflection.Reflection2.*;
 
 @SuppressWarnings({ "unused", "RedundantCast", "SameParameterValue" })
-public abstract class JDialogBase extends JDialog {
+public abstract class JDialogBase extends JDialog implements CustomComponent {
 
     public static final String CONTENT_PANE_FIELD_NAME = "contentPane";
     public static final int    NO_BUTTON               = 0;
@@ -74,15 +74,15 @@ public abstract class JDialogBase extends JDialog {
         return exitCode;
     }
 
-    public abstract void setup(Object @NotNull ... args);
-
-    protected void createUIComponents() { }
-
-    protected @UnknownNullability JPanel getBaseContentPane() {
+    public @Override JPanel getRootPanel() {
         Class<? extends JDialogBase> c = getClass();
         Class<RootPanel>             a = RootPanel.class;
         return (JPanel)getAnnotatedFields(c, a).findFirst().map(f -> getFieldValue(f, this)).orElseGet(() -> getAnnotatedMethods(c, a).findFirst().map(m -> callMethod(m, this)).orElse(null));
     }
+
+    public abstract void setup(Object @NotNull ... args);
+
+    protected void createUIComponents() { }
 
     protected void onCancel() {
         setCodeAndExit(CANCEL_BUTTON);
@@ -112,7 +112,7 @@ public abstract class JDialogBase extends JDialog {
     public static <T extends JDialogBase> @NotNull T create(@NotNull Class<T> dialogClass, @Nullable Component owner, @NotNull String titleKey, @NotNull PGResourceBundle msgs, Object @NotNull ... args) {
         Class<DialogButtonsInterface> dlgBtnCls = DialogButtonsInterface.class;
         T                             dlg       = create(dialogClass, owner, titleKey, msgs);
-        JPanel                        cp        = dlg.getBaseContentPane();
+        JPanel                        cp        = dlg.getRootPanel();
 
         cp.registerKeyboardAction(e -> dlg.onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         dlg.setContentPane(cp);
