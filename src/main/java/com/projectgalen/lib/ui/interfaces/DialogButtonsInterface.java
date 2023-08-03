@@ -27,7 +27,9 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import java.awt.event.ActionListener;
 
-public interface DialogButtonsInterface {
+public interface DialogButtonsInterface extends CustomComponent {
+
+    default JPanel getRootPanel() { return getDialogButtonsPanel(); }
 
     void addCancelButtonListener(@NotNull ActionListener e);
 
