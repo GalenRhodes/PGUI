@@ -78,6 +78,14 @@ public class ProgressDialog extends JDialog implements ProgressReporter {
         return progressBar.getString();
     }
 
+    public boolean isIndeterminate() {
+        return progressBar.isIndeterminate();
+    }
+
+    public void setIndeterminate(boolean isIndeterminate) {
+        SwingUtilities.invokeLater(() -> progressBar.setIndeterminate(isIndeterminate));
+    }
+
     public void setMessage(@NotNull String msg) {
         SwingUtilities.invokeLater(() -> message.setText(msg));
     }
@@ -96,14 +104,6 @@ public class ProgressDialog extends JDialog implements ProgressReporter {
 
     public void setProgressText(@NotNull String text) {
         SwingUtilities.invokeLater(() -> progressBar.setString(text));
-    }
-
-    public boolean isIndeterminate() {
-        return progressBar.isIndeterminate();
-    }
-
-    public void setIndeterminate(boolean isIndeterminate) {
-        SwingUtilities.invokeLater(() -> progressBar.setIndeterminate(isIndeterminate));
     }
 
     private void onOK() {

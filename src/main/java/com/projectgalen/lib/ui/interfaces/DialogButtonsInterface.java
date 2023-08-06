@@ -29,8 +29,6 @@ import java.awt.event.ActionListener;
 
 public interface DialogButtonsInterface extends CustomComponent {
 
-    default JPanel getRootPanel() { return getDialogButtonsPanel(); }
-
     void addCancelButtonListener(@NotNull ActionListener e);
 
     void addOKButtonListener(@NotNull ActionListener e);
@@ -40,6 +38,8 @@ public interface DialogButtonsInterface extends CustomComponent {
     JButton getButtonOK();
 
     JPanel getDialogButtonsPanel();
+
+    default JPanel getRootPanel() { return getDialogButtonsPanel(); }
 
     boolean isCancelButtonEnabled();
 

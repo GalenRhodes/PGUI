@@ -47,6 +47,15 @@ public final class UI {
 
     private UI() { }
 
+    public static void execSafe(@NotNull com.projectgalen.lib.utils.delegates.ThrowingRunnable throwingRunnable) {
+        try {
+            throwingRunnable.run();
+        }
+        catch(Throwable t) {
+            t.printStackTrace(System.err);
+        }
+    }
+
     @Contract(value = "_, _ -> new", pure = true)
     public static @NotNull GridConstraints getGridConstraints(int row, int column) {
         return getGridConstraints(row, column, 1, 1, GridConstraints.ANCHOR_CENTER);
