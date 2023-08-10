@@ -172,7 +172,7 @@ public final class UI {
         else SwingUtilities.invokeLater(runnable);
     }
 
-    public static void setButtonText(@NotNull JButton button, @NotNull String text, @Nullable KeyStroke oldAccel, @Nullable KeyStroke newAccel, @NotNull ActionListener actionListener) {
+    public static KeyStroke setButtonText(@NotNull JButton button, @NotNull String text, @Nullable KeyStroke oldAccel, @Nullable KeyStroke newAccel, @NotNull ActionListener actionListener) {
         if(newAccel == null) {
             int idx = (text.indexOf('&') + 1);
             if((idx > 0) && (idx < text.length())) {
@@ -187,7 +187,10 @@ public final class UI {
         if((newAccel != null) && !Objects.equals(newAccel, oldAccel)) {
             if(oldAccel != null) button.unregisterKeyboardAction(oldAccel);
             button.registerKeyboardAction(actionListener, newAccel, JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+            return newAccel;
         }
+
+        return oldAccel;
     }
 
     public static void setFlatLaf() throws UnsupportedLookAndFeelException {
