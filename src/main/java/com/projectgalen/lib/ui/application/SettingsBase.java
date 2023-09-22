@@ -39,6 +39,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.projectgalen.lib.ui.M.msgs;
 
+@SuppressWarnings("unused")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public abstract class SettingsBase {
@@ -47,9 +48,9 @@ public abstract class SettingsBase {
 
     private @JsonIgnore final Trigger trigger = new Trigger(1, TimeUnit.SECONDS, this::autoSaveSettings);
 
-    public SettingsBase()              { }
+    public SettingsBase()              { this(false); }
 
-    public SettingsBase(boolean dummy) { }
+    public SettingsBase(boolean dummy) { super(); }
 
     public void trigger() {
         trigger.trigger();
