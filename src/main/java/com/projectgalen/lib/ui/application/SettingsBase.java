@@ -43,8 +43,9 @@ import static com.projectgalen.lib.ui.M.msgs;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public abstract class SettingsBase {
 
-    protected @JsonIgnore       File    settingsFile;
-    protected @JsonIgnore final Trigger trigger = new Trigger(1, TimeUnit.SECONDS, this::autoSaveSettings);
+    protected @JsonIgnore File settingsFile;
+
+    private @JsonIgnore final Trigger trigger = new Trigger(1, TimeUnit.SECONDS, this::autoSaveSettings);
 
     public SettingsBase()              { }
 
