@@ -67,6 +67,10 @@ public class PGJComboBox<T> extends JComboBox<T> {
         super.setModel(new PGComboBoxModel<>(this::getDataImpl, this::isOptional));
     }
 
+    public @Nullable @Override T getSelectedItem() {
+        return getModelImpl().getSelectedItem();
+    }
+
     public @NotNull List<T> getData() {
         return Collections.unmodifiableList(data);
     }

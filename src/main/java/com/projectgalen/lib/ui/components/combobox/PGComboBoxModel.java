@@ -56,7 +56,7 @@ public class PGComboBoxModel<T> extends AbstractListModel<T> implements ComboBox
         return (isOptional() ? getDataValue(idx - 1) : getDataValue(idx));
     }
 
-    public @Override Object getSelectedItem() {
+    public @Override T getSelectedItem() {
         return selectedItem;
     }
 
