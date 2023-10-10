@@ -89,7 +89,7 @@ public class PGListCellRenderer<T> implements ListCellRenderer<T> {
         synchronized(delegate.lock) {
             allow = true;
             try {
-                String    displayString = stringFunction.apply(value);
+                String displayString = ofNullable(value).map(v -> stringFunction.apply(v)).orElse(null);
                 Component renderer      = delegate.getListCellRendererComponent(list, displayString, index, isSelected, cellHasFocus);
                 return getUserListCellRendererComponent(renderer, list, value, displayString, index, isSelected, cellHasFocus);
             }
