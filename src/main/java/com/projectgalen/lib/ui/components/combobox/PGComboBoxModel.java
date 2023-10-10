@@ -1,4 +1,4 @@
-package com.projectgalen.lib.ui.models;
+package com.projectgalen.lib.ui.components.combobox;
 
 // ===========================================================================
 //     PROJECT: PGUI
@@ -37,6 +37,10 @@ public class PGComboBoxModel<T> extends AbstractListModel<T> implements ComboBox
     private final @NotNull Supplier<List<T>> dataSupplier;
     private final @NotNull Supplier<Boolean> isOptionalSupplier;
     private                T                 selectedItem = null;
+
+    public PGComboBoxModel() {
+        this(Collections::emptyList, () -> false);
+    }
 
     public PGComboBoxModel(@NotNull Supplier<List<T>> dataSupplier, @NotNull Supplier<Boolean> isOptionalSupplier) {
         super();
