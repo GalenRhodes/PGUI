@@ -56,7 +56,6 @@ public class PGListCellRenderer<T> implements ListCellRenderer<T> {
     private static final Color  DEFAULT_NULL_BG_COLOR = new Color(255, 255, 255, 255);
 
     private final    PGDefaultListCellRenderer delegate = new PGDefaultListCellRenderer();
-    private final    String                    lock     = UUID.randomUUID().toString();
     private          boolean                   allow    = false;
     private @NotNull Function<T, String>       stringFunction;
     private          Color                     noValueFGColor;
@@ -87,7 +86,7 @@ public class PGListCellRenderer<T> implements ListCellRenderer<T> {
                                                                                                   int index,
                                                                                                   boolean isSelected,
                                                                                                   boolean cellHasFocus) {
-        synchronized(lock) {
+        synchronized(delegate.lock) {
             allow = true;
             try {
                 String    displayString = stringFunction.apply(value);
@@ -157,6 +156,7 @@ public class PGListCellRenderer<T> implements ListCellRenderer<T> {
     private class PGDefaultListCellRenderer extends DefaultListCellRenderer {
 
         private final Set<String> propertySet = new TreeSet<>();
+        private final String      lock        = UUID.randomUUID().toString();
 
         public PGDefaultListCellRenderer() { super(); }
 
