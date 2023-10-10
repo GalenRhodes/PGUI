@@ -205,7 +205,10 @@ public class PGListCellRenderer<T> implements ListCellRenderer<T> {
         public @Override void setText(String text)        { condSet("Text", () -> super.setText(text)); }
 
         private void condSet(@NotNull String key, @NotNull Runnable runnable) {
-            synchronized(lock) {
+            if(lock == null) {
+                runnable.run();
+            }
+            else synchronized(lock) {
                 if(allow) {
                     runnable.run();
                     propertySet.add(key);
