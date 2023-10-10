@@ -40,7 +40,7 @@ import java.util.function.Supplier;
 
 import static java.util.Optional.ofNullable;
 
-@SuppressWarnings({ "unused", "SameParameterValue" })
+@SuppressWarnings({ "unused", "SameParameterValue", "UnusedAssignment" })
 public class PGListCellRenderer<T> implements ListCellRenderer<T> {
 
     private static final String UI1                   = "List.cellNoFocusBorder";
@@ -55,19 +55,19 @@ public class PGListCellRenderer<T> implements ListCellRenderer<T> {
     private static final Color  DEFAULT_NULL_FG_COLOR = new Color(193, 193, 193, 255);
     private static final Color  DEFAULT_NULL_BG_COLOR = new Color(255, 255, 255, 255);
 
-    private final    PGDefaultListCellRenderer delegate = new PGDefaultListCellRenderer();
-    private          boolean                   allow    = false;
-    private @NotNull Function<T, String>       stringFunction;
+    private final    PGDefaultListCellRenderer delegate       = new PGDefaultListCellRenderer();
+    private          boolean                   allow          = false;
+    private @NotNull Function<T, String>       stringFunction = o -> Objects.toString(o, DEFAULT_NULL_STRING);
     private          Color                     noValueFGColor;
     private          Color                     noValueBGColor;
     private          String                    noValueText;
 
     public PGListCellRenderer() {
-        this(null, null, item -> Objects.toString(item, null));
+        this(null, null, item -> Objects.toString(item, DEFAULT_NULL_STRING));
     }
 
     public PGListCellRenderer(@Nullable Color noValueFGColor, @Nullable Color noValueBGColor) {
-        this(noValueFGColor, noValueBGColor, item -> Objects.toString(item, null));
+        this(noValueFGColor, noValueBGColor, item -> Objects.toString(item, DEFAULT_NULL_STRING));
     }
 
     public PGListCellRenderer(@NotNull Function<T, String> stringFunction) {
