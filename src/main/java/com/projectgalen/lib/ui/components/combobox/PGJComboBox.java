@@ -27,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
+import java.beans.JavaBean;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,6 +37,8 @@ import java.util.function.Function;
 import static java.util.Optional.ofNullable;
 
 @SuppressWarnings({ "unused", "unchecked" })
+@JavaBean(defaultProperty = "UI", description = "A combination of a text field and a drop-down list.")
+@SwingContainer(false)
 public class PGJComboBox<T> extends JComboBox<T> {
 
     protected @NotNull final List<T>             data;
@@ -107,45 +110,49 @@ public class PGJComboBox<T> extends JComboBox<T> {
         this.data.clear();
         this.data.addAll(data);
         this.stringFunction = stringFunction;
-        getModelImpl().fireContentsChanged();
+        fireContentsChanged();
     }
 
     public @Override void setModel(ComboBoxModel<T> aModel) {
-        getModelImpl().fireContentsChanged();
+        fireContentsChanged();
     }
 
     public void setNullItemBackground(Color nullItemBackground) {
         getRendererImpl().setNullItemBackground(nullItemBackground);
-        getModelImpl().fireContentsChanged();
+        fireContentsChanged();
     }
 
     public void setNullItemForeground(Color nullItemForeground) {
         getRendererImpl().setNullItemForeground(nullItemForeground);
-        getModelImpl().fireContentsChanged();
+        fireContentsChanged();
     }
 
     public void setNullItemText(String nullItemText) {
         getRendererImpl().setNullItemText(nullItemText);
-        getModelImpl().fireContentsChanged();
+        fireContentsChanged();
     }
 
     public void setOptional(boolean optional) {
         isOptional = optional;
-        getModelImpl().fireContentsChanged();
+        fireContentsChanged();
     }
 
     public void setRenderProxy(@Nullable PGListCellRendererProxy<T> renderProxy) {
         getRendererImpl().setRenderProxy(renderProxy);
-        getModelImpl().fireContentsChanged();
+        fireContentsChanged();
     }
 
     public @Override void setRenderer(ListCellRenderer<? super T> aRenderer) {
-        getModelImpl().fireContentsChanged();
+        fireContentsChanged();
     }
 
     public void setStringFunction(@NotNull Function<T, String> stringFunction) {
         this.stringFunction = stringFunction;
-        getModelImpl().fireContentsChanged();
+        fireContentsChanged();
+    }
+
+    private void fireContentsChanged() {
+        if(dataModel instanceof PGComboBoxModel<T> model) model.fireContentsChanged();
     }
 
     private @NotNull List<T> getDataImpl() {
