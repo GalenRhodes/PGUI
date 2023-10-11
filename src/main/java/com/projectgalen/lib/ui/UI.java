@@ -124,7 +124,7 @@ public final class UI {
             int i = (idx + 1);
             if(i == len) break;
             int cp = text.codePointAt(i);
-            if(cp != '&') return new Mnemonic(text.substring(0, idx) + text.substring(i), true, KeyEvent.getExtendedKeyCodeForChar(cp), i);
+            if(cp != '&') return new Mnemonic(text.substring(0, idx) + text.substring(i), true, KeyEvent.getExtendedKeyCodeForChar(cp), idx);
             idx = text.indexOf('&', (i + 1));
         }
 
@@ -192,7 +192,7 @@ public final class UI {
     }
 
     @Contract("_, _ -> param1") public static <T extends AbstractButton> @NotNull T setButtonText(@NotNull T button, @NotNull String text) {
-        Mnemonic mnemonic = UI.getMnemonic(text);
+        Mnemonic mnemonic = getMnemonic(text);
         button.setText(mnemonic.text());
 
         if(mnemonic.hasMnemonic()) {
