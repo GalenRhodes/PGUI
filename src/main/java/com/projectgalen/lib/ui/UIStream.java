@@ -36,7 +36,10 @@ import java.util.stream.Stream;
 public final class UIStream {
     private UIStream() { }
 
-    public static <C extends Component, R> R fromChildStream(@Nullable Container container, @NotNull Class<C> cls, @Nullable @RegExp @NonNls @Language("RegExp") String pattern, @NotNull Function<Stream<C>, R> function) {
+    public static <C extends Component, R> R fromChildStream(@Nullable Container container,
+                                                             @NotNull Class<C> cls,
+                                                             @Nullable @RegExp @NonNls @Language("RegExp") String pattern,
+                                                             @NotNull Function<Stream<C>, R> function) {
         if(container == null) return function.apply(Stream.empty());
         synchronized(container.getTreeLock()) {
             return function.apply(Stream.of(container.getComponents())
@@ -54,7 +57,10 @@ public final class UIStream {
         withChildStream(container, cls, null, consumer);
     }
 
-    public static <C extends Component> void withChildStream(@Nullable Container container, @NotNull Class<C> cls, @Nullable @RegExp @NonNls @Language("RegExp") String pattern, @NotNull Consumer<Stream<C>> consumer) {
+    public static <C extends Component> void withChildStream(@Nullable Container container,
+                                                             @NotNull Class<C> cls,
+                                                             @Nullable @RegExp @NonNls @Language("RegExp") String pattern,
+                                                             @NotNull Consumer<Stream<C>> consumer) {
         fromChildStream(container, cls, pattern, s -> { consumer.accept(s); return null; });/*@f0*/
     }/*@f1*/
 }

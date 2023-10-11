@@ -56,13 +56,13 @@ public class PGJListCellRenderer<T> implements ListCellRenderer<T>, PGJListCellR
     private static final Color  DEFAULT_NULL_FG_COLOR = new Color(193, 193, 193, 255);
     private static final Color  DEFAULT_NULL_BG_COLOR = new Color(255, 255, 255, 255);
 
-    private final     PGDefaultListCellRenderer  delegate           = new PGDefaultListCellRenderer();
-    private           boolean                    allow              = false;
-    private @NotNull  Function<T, String>        stringFunction     = Objects::toString;
-    private @Nullable PGJListCellRendererProxy<T> renderProxy       = null;
-    private           Color nullItemForeground                      = null;
-    private           Color                      nullItemBackground = null;
-    private           String                     nullItemText       = null;
+    private final     PGDefaultListCellRenderer   delegate           = new PGDefaultListCellRenderer();
+    private           boolean                     allow              = false;
+    private @NotNull  Function<T, String>         stringFunction     = Objects::toString;
+    private @Nullable PGJListCellRendererProxy<T> renderProxy        = null;
+    private           Color                       nullItemForeground = null;
+    private           Color                       nullItemBackground = null;
+    private           String                      nullItemText       = null;
 
     public PGJListCellRenderer() {
         this(null, null, null, Objects::toString, null);

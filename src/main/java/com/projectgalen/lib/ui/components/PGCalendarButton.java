@@ -73,26 +73,6 @@ public class PGCalendarButton extends JButton {
         addActionListener(e -> editDate());
     }
 
-    public void setAll(@Nullable Component popupDialogOwner,
-                       @org.jetbrains.annotations.Range(from = 1583, to = 3000) int startYear,
-                       @org.jetbrains.annotations.Range(from = 1583, to = 3000) int endYear,
-                       @Nullable String dateFormat,
-                       @Nullable String buttonText,
-                       @Nullable String toolTipText,
-                       @Nullable Icon icon,
-                       @Nullable Date date) {
-        this.popupDialogOwner = popupDialogOwner;
-        this.startYear        = startYear;
-        this.endYear          = endYear;
-        this.date             = Dates.toSQLDate(date);
-        this.buttonText       = buttonText;
-        this.dateFormat       = dateFormat;
-
-        setIcon(icon);
-        setToolTipText(toolTipText);
-        setButtonText();
-    }
-
     public Date getDate() {
         return date;
     }
@@ -111,6 +91,26 @@ public class PGCalendarButton extends JButton {
 
     public int getStartYear() {
         return startYear;
+    }
+
+    public void setAll(@Nullable Component popupDialogOwner,
+                       @org.jetbrains.annotations.Range(from = 1583, to = 3000) int startYear,
+                       @org.jetbrains.annotations.Range(from = 1583, to = 3000) int endYear,
+                       @Nullable String dateFormat,
+                       @Nullable String buttonText,
+                       @Nullable String toolTipText,
+                       @Nullable Icon icon,
+                       @Nullable Date date) {
+        this.popupDialogOwner = popupDialogOwner;
+        this.startYear        = startYear;
+        this.endYear          = endYear;
+        this.date             = Dates.toSQLDate(date);
+        this.buttonText       = buttonText;
+        this.dateFormat       = dateFormat;
+
+        setIcon(icon);
+        setToolTipText(toolTipText);
+        setButtonText();
     }
 
     public void setDate(Date date) {

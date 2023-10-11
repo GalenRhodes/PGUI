@@ -109,7 +109,11 @@ public abstract class JDialogBase extends JDialog implements CustomComponent {
         JOptionPane.showMessageDialog(this, message, msgs.getString(titleKey), type);
     }
 
-    public static <T extends JDialogBase> @NotNull T create(@NotNull Class<T> dialogClass, @Nullable Component owner, @NotNull String titleKey, @NotNull PGResourceBundle msgs, Object @NotNull ... args) {
+    public static <T extends JDialogBase> @NotNull T create(@NotNull Class<T> dialogClass,
+                                                            @Nullable Component owner,
+                                                            @NotNull String titleKey,
+                                                            @NotNull PGResourceBundle msgs,
+                                                            Object @NotNull ... args) {
         Class<DialogButtonsInterface> dlgBtnCls = DialogButtonsInterface.class;
         T                             dlg       = create(dialogClass, owner, titleKey, msgs);
         JPanel                        cp        = dlg.getRootPanel();

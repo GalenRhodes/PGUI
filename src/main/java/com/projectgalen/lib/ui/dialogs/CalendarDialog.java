@@ -3,7 +3,7 @@ package com.projectgalen.lib.ui.dialogs;
 import com.projectgalen.lib.ui.M;
 import com.projectgalen.lib.ui.annotations.RootPanel;
 import com.projectgalen.lib.ui.base.JDialogBase;
-import com.projectgalen.lib.ui.components.CalendarFace;
+import com.projectgalen.lib.ui.components.PGCalendarFace;
 import com.projectgalen.lib.ui.components.PGDialogButtons;
 import com.projectgalen.lib.ui.components.combobox.PGJComboBox;
 import com.projectgalen.lib.utils.Dates;
@@ -36,7 +36,7 @@ public class CalendarDialog extends JDialogBase {
     protected            JButton              buttonNext;
     protected            PGJComboBox<Integer> fieldMonths;
     protected            PGJComboBox<Integer> fieldYears;
-    protected            CalendarFace         calendarFace;
+    protected            PGCalendarFace       calendarFace;
     protected            PGDialogButtons      dialogButtons;
     protected            int                  storedMonth = 0;
     protected            int                  storedDate  = 1;

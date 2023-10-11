@@ -3,7 +3,7 @@
   <grid id="cbd77" binding="contentPane" layout-manager="GridLayoutManager" row-count="3" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="10" left="10" bottom="10" right="10"/>
     <constraints>
-      <xy x="48" y="54" width="394" height="336"/>
+      <xy x="48" y="54" width="386" height="277"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -58,14 +58,15 @@
           </grid>
         </children>
       </grid>
-      <nested-form id="3853a" form-file="com/projectgalen/lib/ui/components/CalendarFace.form" binding="calendarFace">
-        <constraints>
-          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="1" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-      </nested-form>
       <component id="9bd89" class="com.projectgalen.lib.ui.components.PGDialogButtons" binding="dialogButtons" custom-create="true">
         <constraints>
           <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+      </component>
+      <component id="406b8" class="com.projectgalen.lib.ui.components.PGCalendarFace" binding="calendarFace">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
       </component>
