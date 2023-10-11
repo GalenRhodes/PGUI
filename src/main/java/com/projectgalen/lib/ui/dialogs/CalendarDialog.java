@@ -76,16 +76,17 @@ public class CalendarDialog extends JDialogBase {
         fieldMonths.setSelectedItem(storedMonth);
         buttonNext.addActionListener(e -> incMonth(1));
         buttonPrev.addActionListener(e -> incMonth(-1));
-        calendarFace.addCalendarFaceListener(e -> storedDate = e.selectedDate);
-        calendarFace.setToolTipFunc(dt -> DATE_FMT1.format(getDate()));
     }
 
     protected @Override void createUIComponents() {
         int year = PGCalendar.getInstance().getYear();
-        fieldMonths = new PGJComboBox<>(IntStream.range(0, MONTHS.size()).boxed().toList(), false, MONTHS::get);
-        fieldYears  = new PGJComboBox<>(createYearList(year, year + 10), false, String::valueOf);
+        calendarFace = new PGCalendarFace();
+        fieldMonths  = new PGJComboBox<>(IntStream.range(0, MONTHS.size()).boxed().toList(), false, MONTHS::get);
+        fieldYears   = new PGJComboBox<>(createYearList(year, year + 10), false, String::valueOf);
         fieldMonths.addItemListener(e -> onMonthChanged());
         fieldYears.addItemListener(e -> onYearChanged());
+        calendarFace.addCalendarFaceListener(e -> storedDate = e.selectedDate);
+        calendarFace.setToolTipFunc(dt -> DATE_FMT1.format(getDate()));
     }
 
     protected @Override void onCancel() {
