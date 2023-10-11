@@ -62,7 +62,7 @@ public class PGJComboBox<T> extends JComboBox<T> {
     }
 
     public PGJComboBox(@NotNull List<T> data, boolean isOptional, @Nullable PGListCellRendererProxy<T> renderProxy, @NotNull Function<T, String> stringFuction) {
-        super();
+        super(new PGComboBoxModel<>());
         this.data           = new ArrayList<>(data);
         this.stringFunction = stringFuction;
         this.isOptional     = isOptional;
@@ -114,6 +114,7 @@ public class PGJComboBox<T> extends JComboBox<T> {
     }
 
     public @Override void setModel(ComboBoxModel<T> aModel) {
+        if(aModel instanceof PGComboBoxModel<T> model) super.setModel(model);
         fireContentsChanged();
     }
 
@@ -139,10 +140,6 @@ public class PGJComboBox<T> extends JComboBox<T> {
 
     public void setRenderProxy(@Nullable PGListCellRendererProxy<T> renderProxy) {
         getRendererImpl().setRenderProxy(renderProxy);
-        fireContentsChanged();
-    }
-
-    public @Override void setRenderer(ListCellRenderer<? super T> aRenderer) {
         fireContentsChanged();
     }
 
