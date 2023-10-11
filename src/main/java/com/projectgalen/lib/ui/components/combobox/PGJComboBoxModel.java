@@ -2,7 +2,7 @@ package com.projectgalen.lib.ui.components.combobox;
 
 // ===========================================================================
 //     PROJECT: PGUI
-//    FILENAME: PGComboBoxModel.java
+//    FILENAME: PGJComboBoxModel.java
 //         IDE: IntelliJ IDEA
 //      AUTHOR: Galen Rhodes
 //        DATE: October 10, 2023
@@ -33,16 +33,16 @@ import java.util.function.Supplier;
 import static java.util.Optional.ofNullable;
 
 @SuppressWarnings({ "unchecked", "unused" })
-public class PGComboBoxModel<T> extends AbstractListModel<T> implements ComboBoxModel<T> {
+public class PGJComboBoxModel<T> extends AbstractListModel<T> implements ComboBoxModel<T> {
     private final @NotNull Supplier<List<T>> dataSupplier;
     private final @NotNull Supplier<Boolean> isOptionalSupplier;
     private                T                 selectedItem = null;
 
-    public PGComboBoxModel() {
+    public PGJComboBoxModel() {
         this(Collections::emptyList, () -> false);
     }
 
-    public PGComboBoxModel(@NotNull Supplier<List<T>> dataSupplier, @NotNull Supplier<Boolean> isOptionalSupplier) {
+    public PGJComboBoxModel(@NotNull Supplier<List<T>> dataSupplier, @NotNull Supplier<Boolean> isOptionalSupplier) {
         super();
         this.dataSupplier       = dataSupplier;
         this.isOptionalSupplier = isOptionalSupplier;

@@ -2,7 +2,7 @@ package com.projectgalen.lib.ui.components.combobox;
 
 // ===========================================================================
 //     PROJECT: PGUI
-//    FILENAME: PGListCellRenderer.java
+//    FILENAME: PGJListCellRenderer.java
 //         IDE: IntelliJ IDEA
 //      AUTHOR: Galen Rhodes
 //        DATE: October 10, 2023
@@ -41,7 +41,7 @@ import java.util.function.Supplier;
 import static java.util.Optional.ofNullable;
 
 @SuppressWarnings({ "unused", "SameParameterValue", "UnusedAssignment" })
-public class PGListCellRenderer<T> implements ListCellRenderer<T>, PGListCellRendererProxy<T> {
+public class PGJListCellRenderer<T> implements ListCellRenderer<T>, PGJListCellRendererProxy<T> {
 
     public static final String DEFAULT_NULL_STRING = "<none>";
 
@@ -59,28 +59,28 @@ public class PGListCellRenderer<T> implements ListCellRenderer<T>, PGListCellRen
     private final     PGDefaultListCellRenderer  delegate           = new PGDefaultListCellRenderer();
     private           boolean                    allow              = false;
     private @NotNull  Function<T, String>        stringFunction     = Objects::toString;
-    private @Nullable PGListCellRendererProxy<T> renderProxy        = null;
-    private           Color                      nullItemForeground = null;
+    private @Nullable PGJListCellRendererProxy<T> renderProxy       = null;
+    private           Color nullItemForeground                      = null;
     private           Color                      nullItemBackground = null;
     private           String                     nullItemText       = null;
 
-    public PGListCellRenderer() {
+    public PGJListCellRenderer() {
         this(null, null, null, Objects::toString, null);
     }
 
-    public PGListCellRenderer(@NotNull Function<T, String> stringFunction) {
+    public PGJListCellRenderer(@NotNull Function<T, String> stringFunction) {
         this(null, null, null, stringFunction, null);
     }
 
-    public PGListCellRenderer(@NotNull Function<T, String> stringFunction, @Nullable PGListCellRendererProxy<T> proxyRenderer) {
+    public PGJListCellRenderer(@NotNull Function<T, String> stringFunction, @Nullable PGJListCellRendererProxy<T> proxyRenderer) {
         this(null, null, null, stringFunction, proxyRenderer);
     }
 
-    public PGListCellRenderer(@Nullable Color nullItemForeground,
-                              @Nullable Color nullItemBackground,
-                              @Nullable String nullItemText,
-                              @NotNull Function<T, String> stringFunction,
-                              @Nullable PGListCellRendererProxy<T> proxyRenderer) {
+    public PGJListCellRenderer(@Nullable Color nullItemForeground,
+                               @Nullable Color nullItemBackground,
+                               @Nullable String nullItemText,
+                               @NotNull Function<T, String> stringFunction,
+                               @Nullable PGJListCellRendererProxy<T> proxyRenderer) {
         super();
         this.stringFunction     = stringFunction;
         this.nullItemForeground = nullItemForeground;
@@ -129,7 +129,7 @@ public class PGListCellRenderer<T> implements ListCellRenderer<T>, PGListCellRen
         return nullItemText;
     }
 
-    public @Nullable PGListCellRendererProxy<T> getRenderProxy() {
+    public @Nullable PGJListCellRendererProxy<T> getRenderProxy() {
         return renderProxy;
     }
 
@@ -149,7 +149,7 @@ public class PGListCellRenderer<T> implements ListCellRenderer<T>, PGListCellRen
         this.nullItemText = nullItemText;
     }
 
-    public void setRenderProxy(@Nullable PGListCellRendererProxy<T> renderProxy) {
+    public void setRenderProxy(@Nullable PGJListCellRendererProxy<T> renderProxy) {
         this.renderProxy = renderProxy;
     }
 
@@ -248,11 +248,11 @@ public class PGListCellRenderer<T> implements ListCellRenderer<T>, PGListCellRen
         }
 
         private @NotNull Color getNoValueBGColor() {
-            return ofNullable(PGListCellRenderer.this.getNullItemBackground()).orElse(DEFAULT_NULL_BG_COLOR);
+            return ofNullable(PGJListCellRenderer.this.getNullItemBackground()).orElse(DEFAULT_NULL_BG_COLOR);
         }
 
         private @NotNull Color getNoValueFGColor() {
-            return ofNullable(PGListCellRenderer.this.getNullItemForeground()).orElse(DEFAULT_NULL_FG_COLOR);
+            return ofNullable(PGJListCellRenderer.this.getNullItemForeground()).orElse(DEFAULT_NULL_FG_COLOR);
         }
 
         private Color getSelectionColor(boolean isDropTarget, @NotNull String dropTargetValueKey, @NotNull Supplier<Color> defaultSupplier) {

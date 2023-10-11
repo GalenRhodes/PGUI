@@ -42,16 +42,18 @@
                   <text value=""/>
                 </properties>
               </component>
-              <nested-form id="fe555" form-file="com/projectgalen/lib/ui/components/PGUIComboBox.form" binding="fieldMonths">
+              <component id="cba67" class="com.projectgalen.lib.ui.components.combobox.PGJComboBox" binding="fieldMonths" custom-create="true">
                 <constraints>
-                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="1" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
-              </nested-form>
-              <nested-form id="e8db0" form-file="com/projectgalen/lib/ui/components/PGUIComboBox.form" binding="fieldYears">
+                <properties/>
+              </component>
+              <component id="79d42" class="com.projectgalen.lib.ui.components.combobox.PGJComboBox" binding="fieldYears" custom-create="true">
                 <constraints>
-                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="1" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
-              </nested-form>
+                <properties/>
+              </component>
             </children>
           </grid>
         </children>

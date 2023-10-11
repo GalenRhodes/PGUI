@@ -2,7 +2,7 @@ package com.projectgalen.lib.ui.components.combobox;
 
 // ===========================================================================
 //     PROJECT: PGUI
-//    FILENAME: PGListCellRendererProxy.java
+//    FILENAME: PGJListCellRendererProxy.java
 //         IDE: IntelliJ IDEA
 //      AUTHOR: Galen Rhodes
 //        DATE: October 10, 2023
@@ -28,7 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.awt.*;
 
-public interface PGListCellRendererProxy<T> {
+public interface PGJListCellRendererProxy<T> {
     @NotNull Component getListCellRendererComponent(@NotNull Component renderer,
                                                     @NotNull JList<? extends T> list,
                                                     @Nullable T value,

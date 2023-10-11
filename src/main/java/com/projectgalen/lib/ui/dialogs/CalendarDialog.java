@@ -4,7 +4,7 @@ import com.projectgalen.lib.ui.M;
 import com.projectgalen.lib.ui.annotations.RootPanel;
 import com.projectgalen.lib.ui.base.JDialogBase;
 import com.projectgalen.lib.ui.components.CalendarFace;
-import com.projectgalen.lib.ui.components.PGUIComboBox;
+import com.projectgalen.lib.ui.components.combobox.PGJComboBox;
 import com.projectgalen.lib.ui.interfaces.DialogButtonsInterface;
 import com.projectgalen.lib.utils.Dates;
 import com.projectgalen.lib.utils.PGCalendar;
@@ -35,8 +35,8 @@ public class CalendarDialog extends JDialogBase {
     protected            DialogButtonsInterface dialogButtons;
     protected            JButton                buttonPrev;
     protected            JButton                buttonNext;
-    protected            PGUIComboBox<Integer>  fieldMonths;
-    protected            PGUIComboBox<Integer>  fieldYears;
+    protected            PGJComboBox<Integer>   fieldMonths;
+    protected            PGJComboBox<Integer>   fieldYears;
     protected            CalendarFace           calendarFace;
     protected            int                    storedMonth = 0;
     protected            int                    storedDate  = 1;
@@ -71,18 +71,25 @@ public class CalendarDialog extends JDialogBase {
 
         storeDate(initDate);
 
-        fieldMonths.setOptional(false);
-        fieldMonths.setData(IntStream.range(0, MONTHS.size()).boxed().toList(), MONTHS::get);
-        fieldMonths.setSelectedItem(storedMonth);
-        fieldYears.setOptional(false);
-        fieldYears.setData(Streams.closedIntRange(startYear, endYear).boxed().toList(), String::valueOf);
+        fieldYears.setData(createYearList(startYear, endYear), String::valueOf);
         fieldYears.setSelectedItem(storedYear);
-        fieldMonths.addItemListener(e -> onMonthChanged());
-        fieldYears.addItemListener(e -> onYearChanged());
+        fieldMonths.setSelectedItem(storedMonth);
         buttonNext.addActionListener(e -> incMonth(1));
         buttonPrev.addActionListener(e -> incMonth(-1));
         calendarFace.addCalendarFaceListener(e -> storedDate = e.selectedDate);
         calendarFace.setToolTipFunc(dt -> DATE_FMT1.format(getDate()));
+    }
+
+    protected @Override void createUIComponents() {
+        int year = PGCalendar.getInstance().getYear();
+        fieldMonths = new PGJComboBox<>(IntStream.range(0, MONTHS.size()).boxed().toList(), false, MONTHS::get);
+        fieldYears  = new PGJComboBox<>(createYearList(year, year + 10), false, String::valueOf);
+        fieldMonths.addItemListener(e -> onMonthChanged());
+        fieldYears.addItemListener(e -> onYearChanged());
+    }
+
+    @NotNull private static List<Integer> createYearList(int startYear, int endYear) {
+        return Streams.closedIntRange(startYear, endYear).boxed().toList();
     }
 
     protected @Override void onCancel() {
