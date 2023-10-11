@@ -2,7 +2,7 @@ package com.projectgalen.lib.ui.interfaces;
 
 // ===========================================================================
 //     PROJECT: PGBudget
-//    FILENAME: CustomComponent.java
+//    FILENAME: NonGUIEditorCustomComponent.java
 //         IDE: IntelliJ IDEA
 //      AUTHOR: Galen Rhodes
 //        DATE: May 31, 2023

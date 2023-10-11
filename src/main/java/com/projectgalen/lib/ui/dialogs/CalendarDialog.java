@@ -4,8 +4,8 @@ import com.projectgalen.lib.ui.M;
 import com.projectgalen.lib.ui.annotations.RootPanel;
 import com.projectgalen.lib.ui.base.JDialogBase;
 import com.projectgalen.lib.ui.components.CalendarFace;
+import com.projectgalen.lib.ui.components.PGDialogButtons;
 import com.projectgalen.lib.ui.components.combobox.PGJComboBox;
-import com.projectgalen.lib.ui.interfaces.DialogButtonsInterface;
 import com.projectgalen.lib.utils.Dates;
 import com.projectgalen.lib.utils.PGCalendar;
 import com.projectgalen.lib.utils.PGResourceBundle;
@@ -31,18 +31,18 @@ public class CalendarDialog extends JDialogBase {
     private static final SimpleDateFormat DATE_FMT2 = new SimpleDateFormat("MMMM yyyy");
     private static final List<String>     MONTHS    = M.msgs.getStringList("month.values");
 
-    protected @RootPanel JPanel                 contentPane;
-    protected            DialogButtonsInterface dialogButtons;
-    protected            JButton                buttonPrev;
-    protected            JButton                buttonNext;
-    protected            PGJComboBox<Integer>   fieldMonths;
-    protected            PGJComboBox<Integer>   fieldYears;
-    protected            CalendarFace           calendarFace;
-    protected            int                    storedMonth = 0;
-    protected            int                    storedDate  = 1;
-    protected            int                    storedYear  = PGCalendar.getInstance().getYear();
-    protected            int                    minYear;
-    protected            int                    maxYear;
+    protected @RootPanel JPanel               contentPane;
+    protected            JButton              buttonPrev;
+    protected            JButton              buttonNext;
+    protected            PGJComboBox<Integer> fieldMonths;
+    protected            PGJComboBox<Integer> fieldYears;
+    protected            CalendarFace         calendarFace;
+    protected            PGDialogButtons      dialogButtons;
+    protected            int                  storedMonth = 0;
+    protected            int                  storedDate  = 1;
+    protected            int                  storedYear  = PGCalendar.getInstance().getYear();
+    protected            int                  minYear;
+    protected            int                  maxYear;
 
     protected CalendarDialog(@NotNull String titleKey, @NotNull PGResourceBundle msgs) {
         super(titleKey, msgs);
@@ -86,10 +86,6 @@ public class CalendarDialog extends JDialogBase {
         fieldYears  = new PGJComboBox<>(createYearList(year, year + 10), false, String::valueOf);
         fieldMonths.addItemListener(e -> onMonthChanged());
         fieldYears.addItemListener(e -> onYearChanged());
-    }
-
-    @NotNull private static List<Integer> createYearList(int startYear, int endYear) {
-        return Streams.closedIntRange(startYear, endYear).boxed().toList();
     }
 
     protected @Override void onCancel() {
@@ -148,5 +144,9 @@ public class CalendarDialog extends JDialogBase {
         CalendarDialog dlg = CalendarDialog.create(CalendarDialog.class, owner, "dlg.title.calendar", M.msgs, startYear, endYear, date);
         buttonChoiceRef.value = dlg.getExitCode();
         return ((buttonChoiceRef.value == OK_BUTTON) ? dlg.getDate() : null);
+    }
+
+    @NotNull private static List<Integer> createYearList(int startYear, int endYear) {
+        return Streams.closedIntRange(startYear, endYear).boxed().toList();
     }
 }

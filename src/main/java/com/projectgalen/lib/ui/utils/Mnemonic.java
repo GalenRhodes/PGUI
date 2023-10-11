@@ -1,11 +1,11 @@
-package com.projectgalen.lib.ui.interfaces;
+package com.projectgalen.lib.ui.utils;
 
 // ===========================================================================
 //     PROJECT: PGUI
-//    FILENAME: DialogButtonsInterface.java
+//    FILENAME: Mnemonic.java
 //         IDE: IntelliJ IDEA
 //      AUTHOR: Galen Rhodes
-//        DATE: July 28, 2023
+//        DATE: October 11, 2023
 //
 // Copyright © 2023 Project Galen. All rights reserved.
 //
@@ -22,32 +22,5 @@ package com.projectgalen.lib.ui.interfaces;
 // IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 // ===========================================================================
 
-import org.jetbrains.annotations.NotNull;
-
-import javax.swing.*;
-import java.awt.event.ActionListener;
-
-public interface DialogButtonsInterface {
-
-    void addCancelButtonListener(@NotNull ActionListener e);
-
-    void addOKButtonListener(@NotNull ActionListener e);
-
-    JButton getButtonCancel();
-
-    JButton getButtonOK();
-
-    JPanel getDialogButtonsPanel();
-
-    boolean isCancelButtonEnabled();
-
-    boolean isOKButtonEnabled();
-
-    void removeCancelButtonListener(@NotNull ActionListener listener);
-
-    void removeOKButtonListener(@NotNull ActionListener listener);
-
-    void setCancelButtonEnabled(boolean enabled);
-
-    void setOKButtonEnabled(boolean enabled);
+public record Mnemonic(String text, boolean hasMnemonic, char mnemonic, int index) {
 }

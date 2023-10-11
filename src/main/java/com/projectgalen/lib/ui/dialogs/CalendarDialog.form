@@ -58,16 +58,17 @@
           </grid>
         </children>
       </grid>
-      <nested-form id="731f6" form-file="com/projectgalen/lib/ui/components/PGUIDialogButtons.form" binding="dialogButtons">
-        <constraints>
-          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-        </constraints>
-      </nested-form>
       <nested-form id="3853a" form-file="com/projectgalen/lib/ui/components/CalendarFace.form" binding="calendarFace">
         <constraints>
           <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="1" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
       </nested-form>
+      <component id="9bd89" class="com.projectgalen.lib.ui.components.PGDialogButtons" binding="dialogButtons" custom-create="true">
+        <constraints>
+          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+      </component>
     </children>
   </grid>
 </form>

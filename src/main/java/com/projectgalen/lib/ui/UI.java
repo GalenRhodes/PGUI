@@ -25,15 +25,14 @@ package com.projectgalen.lib.ui;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.projectgalen.lib.ui.enums.BuiltInLookAndFeelProfiles;
+import com.projectgalen.lib.ui.utils.Mnemonic;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
-import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -104,12 +103,32 @@ public final class UI {
     }
 
     public static @NotNull Icon getIcon(@NotNull String name, @NotNull Class<?> referenceClass) {
-        try {
-            return new ImageIcon(ImageIO.read(Objects.requireNonNull(referenceClass.getResourceAsStream(name))));
+        return new ImageIcon(Objects.requireNonNull(referenceClass.getResource(name)));
+    }
+
+    public static @NotNull Mnemonic getMnemonic(@NotNull String text) {
+        int idx = text.indexOf('&');
+        int len = text.length();
+
+        while(idx >= 0) {
+            int i = (idx + 1);
+            if(i == len) {
+                break;
+            }
+            else {
+                char ch = text.charAt(i);
+                if(ch == '&') {
+                    int j = (i + 1);
+                    if(j < len) break;
+                    idx = text.indexOf('&', j);
+                }
+                else {
+                    return new Mnemonic(text.substring(0, idx) + text.substring(i), true, ch, idx);
+                }
+            }
         }
-        catch(IOException e) {
-            throw new RuntimeException(e);
-        }
+
+        return new Mnemonic(text, false, '\0', -1);
     }
 
     @Contract(value = "_, _ -> new", pure = true)
