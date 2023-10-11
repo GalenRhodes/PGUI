@@ -69,7 +69,18 @@ public class PGCalendarButton extends JButton {
                             @Nullable Icon icon,
                             @Nullable Date date) {
         super(DEF_BUTTON_TEXT, ofNullable(icon).orElse(DEF_ICON));
+        setAll(popupDialogOwner, startYear, endYear, dateFormat, buttonText, toolTipText, icon, date);
+        addActionListener(e -> editDate());
+    }
 
+    public void setAll(@Nullable Component popupDialogOwner,
+                       @org.jetbrains.annotations.Range(from = 1583, to = 3000) int startYear,
+                       @org.jetbrains.annotations.Range(from = 1583, to = 3000) int endYear,
+                       @Nullable String dateFormat,
+                       @Nullable String buttonText,
+                       @Nullable String toolTipText,
+                       @Nullable Icon icon,
+                       @Nullable Date date) {
         this.popupDialogOwner = popupDialogOwner;
         this.startYear        = startYear;
         this.endYear          = endYear;
@@ -77,9 +88,9 @@ public class PGCalendarButton extends JButton {
         this.buttonText       = buttonText;
         this.dateFormat       = dateFormat;
 
+        setIcon(icon);
         setToolTipText(toolTipText);
         setButtonText();
-        addActionListener(e -> editDate());
     }
 
     public Date getDate() {
