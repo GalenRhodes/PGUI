@@ -34,17 +34,18 @@ import java.util.TreeMap;
 
 import static com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW;
 import static com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK;
+import static com.projectgalen.lib.ui.M.props;
 
 @SuppressWarnings({ "DuplicatedCode", "unused" })
 public interface NonGUIEditorCustomComponent {
 
     int                           SIZE_POLICY_ANY             = (SIZEPOLICY_CAN_SHRINK | SIZEPOLICY_CAN_GROW);
     Map<String, PGResourceBundle> __UI_BUNDLE_CACHE__         = new TreeMap<>();
-    String                        __UI_ICONS_PATH__           = "/com/projectgalen/lib/ui/icons/";
-    String                        __UI_MESSAGES_BUNDLE_PATH__ = "com/projectgalen/lib/ui/messages";
+    String                        __UI_ICONS_PATH__           = props.getProperty("icons.path");
+    String                        __UI_MESSAGES_BUNDLE_PATH__ = props.getProperty("messages.bundle.path");
 
     default @NotNull JButton createButton(@NotNull String iconPath, @NotNull String iconName, @NotNull String textPath, @NotNull String textKey) {
-        return loadButtonText(new JButton(UI.getIcon(iconPath, getClass())), textPath, textKey);
+        return loadButtonText(new JButton(UI.getIcon(iconPath, iconName, getClass())), textPath, textKey);
     }
 
     default @NotNull JButton createButton(@NotNull String iconName, @NotNull String textKey) {

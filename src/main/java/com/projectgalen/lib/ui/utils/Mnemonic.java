@@ -22,5 +22,5 @@ package com.projectgalen.lib.ui.utils;
 // IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 // ===========================================================================
 
-public record Mnemonic(String text, boolean hasMnemonic, char mnemonic, int index) {
+public record Mnemonic(String text, boolean hasMnemonic, int mnemonic, int index) {
 }

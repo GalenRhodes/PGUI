@@ -33,6 +33,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -40,6 +41,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static com.projectgalen.lib.utils.errors.Errors.makeRuntimeException;
 import static com.projectgalen.lib.utils.errors.Errors.propagate;
+import static java.awt.event.KeyEvent.VK_UNDEFINED;
 
 @SuppressWarnings("unused")
 public final class UI {
@@ -106,29 +108,27 @@ public final class UI {
         return new ImageIcon(Objects.requireNonNull(referenceClass.getResource(name)));
     }
 
+    public static @NotNull Icon getIcon(@NotNull String path, @NotNull String name, @NotNull Class<?> referenceClass) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(path = path.replace('\\', '/'));
+        if(!path.endsWith("/")) sb.append('/');
+        if((name = name.replace('\\', '/')).startsWith("/")) name = name.substring(1);
+        return getIcon(sb.append(name).toString(), referenceClass);
+    }
+
     public static @NotNull Mnemonic getMnemonic(@NotNull String text) {
-        int idx = text.indexOf('&');
         int len = text.length();
+        int idx = text.indexOf('&');
 
         while(idx >= 0) {
             int i = (idx + 1);
-            if(i == len) {
-                break;
-            }
-            else {
-                char ch = text.charAt(i);
-                if(ch == '&') {
-                    int j = (i + 1);
-                    if(j < len) break;
-                    idx = text.indexOf('&', j);
-                }
-                else {
-                    return new Mnemonic(text.substring(0, idx) + text.substring(i), true, ch, idx);
-                }
-            }
+            if(i == len) break;
+            int cp = text.codePointAt(i);
+            if(cp != '&') return new Mnemonic(text.substring(0, idx) + text.substring(i), true, KeyEvent.getExtendedKeyCodeForChar(cp), i);
+            idx = text.indexOf('&', (i + 1));
         }
 
-        return new Mnemonic(text, false, '\0', -1);
+        return new Mnemonic(text, false, VK_UNDEFINED, -1);
     }
 
     @Contract(value = "_, _ -> new", pure = true)
@@ -191,7 +191,21 @@ public final class UI {
         else SwingUtilities.invokeLater(runnable);
     }
 
+    @Contract("_, _ -> param1") public static <T extends AbstractButton> @NotNull T setButtonText(@NotNull T button, @NotNull String text) {
+        Mnemonic mnemonic = UI.getMnemonic(text);
+        button.setText(mnemonic.text());
+
+        if(mnemonic.hasMnemonic()) {
+            button.setMnemonic(mnemonic.mnemonic());
+            button.setDisplayedMnemonicIndex(mnemonic.index());
+        }
+
+        return button;
+    }
+
     public static KeyStroke setButtonText(@NotNull JButton button, @NotNull String text, @Nullable KeyStroke oldAccel, @Nullable KeyStroke newAccel, @NotNull ActionListener actionListener) {
+        Mnemonic mnemonic = getMnemonic(text);
+
         if(newAccel == null) {
             int idx = (text.indexOf('&') + 1);
             if((idx > 0) && (idx < text.length())) {

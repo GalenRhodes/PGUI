@@ -2,5 +2,11 @@
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
     <!-- # -->
+    <entry key="icons.path">/com/projectgalen/lib/ui/icons</entry>
+    <entry key="messages.bundle.path">com/projectgalen/lib/ui/messages</entry>
+    <!-- # -->
+    <entry key="calendar.button.icon">calendar.png</entry>
+    <entry key="calendar.button.default.year.range">100</entry>
+    <entry key="calendar.button.default.date.format">MM/dd/yyyy</entry>
     <!-- # -->
 </properties>
