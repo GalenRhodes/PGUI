@@ -10,6 +10,8 @@ import org.jetbrains.annotations.Range;
 
 import javax.swing.*;
 import java.awt.*;
+import java.lang.reflect.Method;
+import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
@@ -22,6 +24,7 @@ public class ProgressDialog extends JDialog implements ProgressReporter {
     protected JLabel         message;
     protected UIButtonChoice buttonChoice = UIButtonChoice.None;
     protected JLabel         finalMessageLabel;
+    private static Method    $$$cachedGetBundleMethod$$$ = null;
 
     public ProgressDialog(@NotNull String title,
                           @NotNull String message,
@@ -104,6 +107,22 @@ public class ProgressDialog extends JDialog implements ProgressReporter {
 
     public void setProgressText(@NotNull String text) {
         SwingUtilities.invokeLater(() -> progressBar.setString(text));
+    }
+
+    private String $$$getMessageFromBundle$$$(String path, String key) {
+        ResourceBundle bundle;
+        try {
+            Class<?> thisClass = this.getClass();
+            if($$$cachedGetBundleMethod$$$ == null) {
+                Class<?> dynamicBundleClass = thisClass.getClassLoader().loadClass("com.intellij.DynamicBundle");
+                $$$cachedGetBundleMethod$$$ = dynamicBundleClass.getMethod("getBundle", String.class, Class.class);
+            }
+            bundle = (ResourceBundle)$$$cachedGetBundleMethod$$$.invoke(null, path, thisClass);
+        }
+        catch(Exception e) {
+            bundle = ResourceBundle.getBundle(path);
+        }
+        return bundle.getString(key);
     }
 
     private void onOK() {

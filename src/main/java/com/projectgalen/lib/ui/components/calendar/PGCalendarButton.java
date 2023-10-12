@@ -1,4 +1,4 @@
-package com.projectgalen.lib.ui.components;
+package com.projectgalen.lib.ui.components.calendar;
 
 // ===========================================================================
 //     PROJECT: PGUI
@@ -23,7 +23,7 @@ package com.projectgalen.lib.ui.components;
 // ===========================================================================
 
 import com.projectgalen.lib.ui.UI;
-import com.projectgalen.lib.ui.dialogs.CalendarDialog;
+import com.projectgalen.lib.ui.dialogs.PGCalendarDialog;
 import com.projectgalen.lib.ui.utils.Mnemonic;
 import com.projectgalen.lib.utils.Dates;
 import com.projectgalen.lib.utils.PGCalendar;
@@ -156,7 +156,7 @@ public class PGCalendarButton extends JButton {
             _date = Range.isInClosedRange(now.getYear(), startYear, endYear) ? now.getSqlDate() : Dates.createSQLDate(startYear, Calendar.JANUARY, 1);
         }
 
-        setDate(ofNullable(CalendarDialog.execute(popupDialogOwner, startYear, endYear, _date)).orElse(date));
+        setDate(ofNullable(PGCalendarDialog.execute(popupDialogOwner, getFont(), startYear, endYear, _date)).orElse(date));
     }
 
     private void setButtonText() {
