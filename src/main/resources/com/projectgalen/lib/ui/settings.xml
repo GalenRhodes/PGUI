@@ -9,4 +9,6 @@
     <entry key="calendar.button.default.year.range">100</entry>
     <entry key="calendar.button.default.date.format">MM/dd/yyyy</entry>
     <!-- # -->
+    <entry key="largest.currency.string">$999,999,999,999.00</entry>
+    <!-- # -->
 </properties>

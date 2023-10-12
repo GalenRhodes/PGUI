@@ -22,21 +22,21 @@ package com.projectgalen.lib.ui.components;
 // IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 // ===========================================================================
 
+import com.projectgalen.lib.ui.M;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.Objects;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({ "unused" })
 public class PGCurrencyTextField extends JFormattedTextField {
 
-    private static final FocusListener focusListener = new MyFocusAdapter();
+    private static final String MAX_VALUE_STRING = M.props.getProperty("largest.currency.string", "$999,999,999,999.99");
 
     public PGCurrencyTextField() {
         this(BigDecimal.ZERO);
@@ -49,13 +49,22 @@ public class PGCurrencyTextField extends JFormattedTextField {
     public PGCurrencyTextField(@NotNull BigDecimal value) {
         super(getCurrencyFormatter());
         setValue(value.doubleValue());
-        setColumns(16);
-        addFocusListener(focusListener);
+        setColumns(MAX_VALUE_STRING.length() + 1);
+        addFocusListener(new FocusAdapter() {
+            public @Override void focusGained(FocusEvent e) {
+                if(e.getComponent() instanceof JFormattedTextField field) {
+                    SwingUtilities.invokeLater(() -> {
+                        field.getCaret().setDot(1);
+                        field.getCaret().moveDot(field.getText().length());
+                    });
+                }
+            }
+        });
 
         SwingUtilities.invokeLater(() -> {
             if(getGraphics() instanceof Graphics2D g) {
                 try {
-                    Dimension size = new Dimension((int)(getFontMetrics(getFont()).getStringBounds("$999,999,999.99", g).getWidth() + 0.5), getHeight());
+                    Dimension size = new Dimension((int)(getFontMetrics(getFont()).getStringBounds(MAX_VALUE_STRING + 1, g).getWidth() + 0.5), getHeight());
                     setMinimumSize(size);
                     setMaximumSize(size);
                     setPreferredSize(size);
@@ -83,22 +92,18 @@ public class PGCurrencyTextField extends JFormattedTextField {
     }
 
     public static @NotNull NumberFormat getCurrencyFormatter() {
-        NumberFormat fmt = NumberFormat.getCurrencyInstance();
-        fmt.setMaximumIntegerDigits(9);
+        String[]     parts = fooBar();
+        NumberFormat fmt   = NumberFormat.getCurrencyInstance();
+        fmt.setMaximumIntegerDigits(parts[0].length());
         fmt.setMinimumIntegerDigits(1);
-        fmt.setMinimumFractionDigits(2);
-        fmt.setMaximumFractionDigits(2);
+        fmt.setMinimumFractionDigits(parts[1].length());
+        fmt.setMaximumFractionDigits(parts[1].length());
         return fmt;
     }
 
-    private static final class MyFocusAdapter extends FocusAdapter {
-        public @Override void focusGained(@NotNull FocusEvent e) {
-            if(e.getComponent() instanceof JFormattedTextField field) {
-                SwingUtilities.invokeLater(() -> {
-                    field.getCaret().setDot(1);
-                    field.getCaret().moveDot(field.getText().length());
-                });
-            }
-        }
+    private static @NotNull String @NotNull [] fooBar() {
+        String str = MAX_VALUE_STRING.replaceAll("[^0-9.]", "");
+        int    dp  = str.lastIndexOf('.');
+        return ((dp < 0) ? new String[] { str, "00" } : new String[] { str.substring(0, dp), str.substring(dp + 1) });
     }
 }

@@ -43,7 +43,7 @@ public class PGDialogButtons extends JPanel implements NonGUIEditorCustomCompone
     protected final JButton buttonCancel;
 
     public PGDialogButtons() {
-        super(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
+        super(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1), true);
         add(new Spacer(), createConstraint(0, 0, ANCHOR_CENTER, FILL_HORIZONTAL, SIZEPOLICY_WANT_GROW, SIZEPOLICY_CAN_SHRINK));
         add(buttonOK = createButton("accept.png", "button.ok"), createConstraint(0, 1, ANCHOR_CENTER, FILL_HORIZONTAL, SIZE_POLICY_BOTH, SIZEPOLICY_FIXED));
         add(buttonCancel = createButton("cancel.png", "button.cancel"), createConstraint(0, 2, ANCHOR_CENTER, FILL_HORIZONTAL, SIZE_POLICY_BOTH, SIZEPOLICY_FIXED));

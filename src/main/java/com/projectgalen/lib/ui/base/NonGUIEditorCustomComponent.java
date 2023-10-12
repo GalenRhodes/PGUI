@@ -32,14 +32,15 @@ import javax.swing.*;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW;
-import static com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK;
+import static com.intellij.uiDesigner.core.GridConstraints.*;
 import static com.projectgalen.lib.ui.M.props;
 
 @SuppressWarnings({ "DuplicatedCode", "unused" })
 public interface NonGUIEditorCustomComponent {
 
     int SIZE_POLICY_BOTH = (SIZEPOLICY_CAN_SHRINK | SIZEPOLICY_CAN_GROW);
+    int SIZE_POLICY_ALL  = (SIZEPOLICY_CAN_SHRINK | SIZEPOLICY_CAN_GROW | SIZEPOLICY_WANT_GROW);
+
     Map<String, PGResourceBundle> __UI_BUNDLE_CACHE__         = new TreeMap<>();
     String                        __UI_ICONS_PATH__           = props.getProperty("icons.path");
     String                        __UI_MESSAGES_BUNDLE_PATH__ = props.getProperty("messages.bundle.path");
