@@ -52,7 +52,9 @@ import static javax.swing.SwingUtilities.invokeLater;
 
 @SuppressWarnings("unused")
 public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomComponent, NullTools {
-    protected final EventListeners   listeners = new EventListeners();
+    protected static final int DEFAULT_ROW_HEIGHT = 16;
+
+    protected final EventListeners   listeners          = new EventListeners();
     protected final PGJTableModel<T> model;
     protected       PGJTableImpl<T>  table;
     protected       boolean          heightMatchesRows;
@@ -60,6 +62,8 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
     protected       int              maximumVisibleRows;
     protected       VSizePolicy      vSizePolicy;
     protected       double[]         colSizes;
+    protected       int              rowHeightTune      = 4;
+    protected       int              totalRowHeightTune = 5;
 
     public PGJTable() {
         this(new PGJTableModel<>(new DummyRowModel<>(), new DummyDataModel<>()), SelectionMode.Single, new double[0], Integer.MAX_VALUE, VSizePolicy.None, false);
@@ -112,10 +116,29 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
 
         invokeLater(() -> {
             with(getColumnHeader(), ch -> ch.setVisible(!this.hideHeader));
-            with(getFont(), f -> f.deriveFont((float)f.getSize()));
             revalidate();
             invokeLater(this::updateColumnPreferredWidths);
         });
+    }
+
+    public int getRowHeightTune() {
+        return rowHeightTune;
+    }
+
+    public @NotNull JTable getTableComponent() {
+        return table;
+    }
+
+    public int getTotalRowHeightTune() {
+        return totalRowHeightTune;
+    }
+
+    public VSizePolicy getvSizePolicy() {
+        return vSizePolicy;
+    }
+
+    public void setRowHeightTune(int rowHeightTune) {
+        this.rowHeightTune = rowHeightTune;
     }
 
     public void addTableSelectionListener(@NotNull PGJTableSelectionListener listener) {
@@ -191,6 +214,10 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
 
     public ListSelectionModel getSelectionModel() {
         return fromV(table, JTable::getSelectionModel, null);
+    }
+
+    public void setTotalRowHeightTune(int totalRowHeightTune) {
+        this.totalRowHeightTune = totalRowHeightTune;
     }
 
     public PGJTableModel<T> getTableModel() {
@@ -303,8 +330,7 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
     }
 
     private int calculateHeight(int rows) {
-        if(table == null) return (21 * rows);
-        return (((table.getRowHeight() + 4) * rows) + 5);
+        return (((table == null) ? (DEFAULT_ROW_HEIGHT * rows) : ((table.getRowHeight() + rowHeightTune) * rows)) + totalRowHeightTune);
     }
 
     @Contract(pure = true) private @NotNull String foo01(Object arg) {
@@ -316,25 +342,11 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
     }
 
     private @NotNull Dimension getViewPortSize(@NotNull Dimension sizeIn) {
-        Dimension sizeOut = new Dimension(sizeIn.width, switch(Objects.requireNonNullElse(vSizePolicy, VSizePolicy.None)) {
+        return new Dimension(sizeIn.width, switch(Objects.requireNonNullElse(vSizePolicy, VSizePolicy.None)) {
             case None -> sizeIn.height;
-            case FitsRows -> {
-                if(table == null) {
-                    System.out.printf("%s: %s: %s\n", "getViewPortSize", "table", foo01(table));
-                    yield calculateHeight(maximumVisibleRows);
-                }
-                TableModel tableModel = table.getModel();
-                if(tableModel == null) {
-                    System.out.printf("%s: %s: %s\n", "getViewPortSize", "tableModel", foo01(tableModel));
-                    yield calculateHeight(maximumVisibleRows);
-                }
-                yield calculateHeight(Math.max(1, Math.min(maximumVisibleRows, tableModel.getRowCount())));
-            }
+            case FitsRows -> calculateHeight(Math.max(1, Math.min(ofNullable(table).map(JTable::getModel).map(TableModel::getRowCount).orElse(maximumVisibleRows), maximumVisibleRows)));
             case Fixed -> calculateHeight(Math.max(1, maximumVisibleRows));
         });
-        System.out.printf("%s: %s: (%,d, %,d)\n", "getViewPortSize", " sizeIn", sizeIn.width, sizeIn.height);
-        System.out.printf("%s: %s: (%,d, %,d)\n", "getViewPortSize", "sizeOut", sizeOut.width, sizeOut.height);
-        return sizeOut;
     }
 
     private void onSelected(ListSelectionEvent event) {
