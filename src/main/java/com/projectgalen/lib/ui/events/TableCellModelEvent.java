@@ -45,8 +45,7 @@ public class TableCellModelEvent extends EventObject {
         this.newValue    = newValue;
     }
 
-    @Override
-    public boolean equals(Object o) {
+    public @Override boolean equals(Object o) {
         return ((this == o) || ((o instanceof TableCellModelEvent) && _equals((TableCellModelEvent)o)));
     }
 
@@ -70,8 +69,7 @@ public class TableCellModelEvent extends EventObject {
         return rowIndex;
     }
 
-    @Override
-    public int hashCode() {
+    public @Override int hashCode() {
         return Objects.hash(getSource(), eventType, rowIndex, columnIndex, oldValue, newValue);
     }
 

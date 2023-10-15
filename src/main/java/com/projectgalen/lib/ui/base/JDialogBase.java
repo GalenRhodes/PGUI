@@ -122,7 +122,7 @@ public abstract class JDialogBase extends JDialog implements CustomComponent {
         dlg.setContentPane(cp);
         dlg.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         dlg.addWindowListener(new WindowAdapter() {
-            @Override public void windowClosing(WindowEvent e) { dlg.onCancel(); }
+            public @Override void windowClosing(WindowEvent e) { dlg.onCancel(); }
         });
         getFields(dialogClass).filter(f -> dlgBtnCls.isAssignableFrom(f.getType())).map(f -> (DialogButtonsInterface)getFieldValue(f, dlg)).filter(Objects::nonNull).forEach(btns -> {
             dlg.getRootPane().setDefaultButton(btns.getButtonOK());

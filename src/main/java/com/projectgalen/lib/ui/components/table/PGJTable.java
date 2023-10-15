@@ -22,108 +22,116 @@ package com.projectgalen.lib.ui.components.table;
 // IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 // ===========================================================================
 
-import com.intellij.uiDesigner.core.GridLayoutManager;
-import com.projectgalen.lib.ui.Fonts;
 import com.projectgalen.lib.ui.base.NonGUIEditorCustomComponent;
+import com.projectgalen.lib.ui.components.table.PGJTable.DummyRowModel.DummyDataModel;
+import com.projectgalen.lib.ui.components.table.PGJTable.DummyRowModel.DummyDataModel.DummyData;
 import com.projectgalen.lib.ui.components.table.misc.*;
+import com.projectgalen.lib.ui.interfaces.PGDataModel;
 import com.projectgalen.lib.utils.EventListeners;
-import org.intellij.lang.annotations.MagicConstant;
+import com.projectgalen.lib.utils.NullTools;
+import com.projectgalen.lib.utils.refs.IntegerRef;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
+import javax.swing.table.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
-import static com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER;
-import static com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH;
-import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
-import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
+import static java.util.Optional.ofNullable;
 import static javax.swing.SwingUtilities.invokeLater;
 
 @SuppressWarnings("unused")
-public class PGJTable<T> extends JPanel implements NonGUIEditorCustomComponent {
-    protected final EventListeners     listeners = new EventListeners();
-    protected final DataModel<T>       dataModel;
-    protected       JTableImpl<T>      dataTable;
-    protected       JScrollPane        scrollPane;
-    protected       boolean            heightMatchesRows;
-    protected       boolean            hideHeader;
-    protected       int                visibleRowCount;
-    protected       int                fontSize;
-    protected       VSizePolicy        vSizePolicy;
-    protected       double @NotNull [] colSizes;
+public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomComponent, NullTools {
+    protected final EventListeners   listeners = new EventListeners();
+    protected final PGJTableModel<T> model;
+    protected       PGJTableImpl<T>  table;
+    protected       boolean          heightMatchesRows;
+    protected       boolean          hideHeader;
+    protected       int              maximumVisibleRows;
+    protected       VSizePolicy      vSizePolicy;
+    protected       double[]         colSizes;
 
     public PGJTable() {
-        this(new DataModel<>(new DummyRowModel<>()), SelectMode.Single, Integer.MAX_VALUE, VSizePolicy.None, false);
+        this(new PGJTableModel<>(new DummyRowModel<>(), new DummyDataModel<>()), SelectionMode.Single, new double[0], Integer.MAX_VALUE, VSizePolicy.None, false);
     }
 
-    public PGJTable(@NotNull DataModel<T> model, @NotNull SelectMode selectMode, int visibleRowCount, @NotNull VSizePolicy vSizePolicy, boolean hideHeader) {
-        this(model, selectMode, new double[0], visibleRowCount, vSizePolicy, hideHeader);
+    public PGJTable(@NotNull PGJTableModel<T> model, @NotNull SelectionMode selectionMode) {
+        this(model, selectionMode, new double[0], Integer.MAX_VALUE, VSizePolicy.None, false);
     }
 
-    public PGJTable(@NotNull DataModel<T> model, @NotNull SelectMode selectMode, double @NotNull [] columnSizeWeights, int visibleRowCount, @NotNull VSizePolicy vSizePolicy, boolean hideHeader) {
-        this(model, selectMode, columnSizeWeights, 11, visibleRowCount, vSizePolicy, hideHeader);
+    public PGJTable(@NotNull PGJTableRowModel<T> rowModel, @NotNull SelectionMode selectionMode) {
+        this(rowModel, selectionMode, new double[0], Integer.MAX_VALUE, VSizePolicy.None, false);
     }
 
-    public PGJTable(@NotNull DataModel<T> dataModel, @NotNull SelectMode selectMode, int fontSize, int visibleRowCount, @NotNull VSizePolicy vSizePolicy, boolean hideHeader) {
-        this(dataModel, selectMode, new double[0], fontSize, visibleRowCount, vSizePolicy, hideHeader);
+    public PGJTable(@NotNull PGJTableModel<T> model, @NotNull SelectionMode selectionMode, int maximumVisibleRows, @NotNull VSizePolicy vSizePolicy, boolean hideHeader) {
+        this(model, selectionMode, new double[0], maximumVisibleRows, vSizePolicy, hideHeader);
     }
 
-    public PGJTable(@NotNull DataModel<T> dataModel,
-                    @NotNull SelectMode selectMode,
+    public PGJTable(@NotNull PGJTableRowModel<T> rowModel, @NotNull SelectionMode selectionMode, int maximumVisibleRows, @NotNull VSizePolicy vSizePolicy, boolean hideHeader) {
+        this(rowModel, selectionMode, new double[0], maximumVisibleRows, vSizePolicy, hideHeader);
+    }
+
+    public PGJTable(@NotNull PGJTableRowModel<T> rowModel,
+                    @NotNull SelectionMode selectionMode,
                     double @NotNull [] columnSizeWeights,
-                    int fontSize,
-                    int visibleRowCount,
+                    int maximumVisibleRows,
                     @NotNull VSizePolicy vSizePolicy,
                     boolean hideHeader) {
-        super(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1), true);
+        this(new PGJTableModel<>(rowModel), selectionMode, columnSizeWeights, maximumVisibleRows, vSizePolicy, hideHeader);
+    }
 
-        this.dataModel         = dataModel;
-        this.hideHeader        = hideHeader;
-        this.heightMatchesRows = false;
-        this.visibleRowCount   = visibleRowCount;
-        this.fontSize          = fontSize;
-        this.vSizePolicy       = vSizePolicy;
-        this.colSizes          = columnSizeWeights;
+    public PGJTable(@NotNull PGJTableModel<T> model,
+                    @NotNull SelectionMode selectionMode,
+                    double @NotNull [] columnSizeWeights,
+                    int maximumVisibleRows,
+                    @NotNull VSizePolicy vSizePolicy,
+                    boolean hideHeader) {
+        super();
+        this.model              = model;
+        this.hideHeader         = hideHeader;
+        this.heightMatchesRows  = false;
+        this.maximumVisibleRows = maximumVisibleRows;
+        this.vSizePolicy        = vSizePolicy;
+        this.colSizes           = columnSizeWeights;
 
-        scrollPane = new JScrollPane(dataTable = new JTableImpl<>(this.dataModel), VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        dataTable.setSelectionMode(selectMode.getValue());
-        dataTable.getSelectionModel().addListSelectionListener(this::onSelected);
-        this.dataModel.addTableModelListener(e -> setTableSize());
+        setViewportView(table = new PGJTableImpl<>(this.model, true, false, false, true));
 
-        add(scrollPane, createConstraint(0, 0, ANCHOR_CENTER, FILL_BOTH, SIZE_POLICY_ALL, SIZE_POLICY_ALL));
+        table.setSelectionMode(selectionMode.getValue());
+        table.getSelectionModel().addListSelectionListener(this::onSelected);
+        this.model.addTableModelListener(e -> revalidate());
 
         invokeLater(() -> {
-            scrollPane.getColumnHeader().setVisible(!this.hideHeader);
-            setTableFont(getFont().deriveFont((float)this.fontSize));
-            setTableSize();
+            with(getColumnHeader(), ch -> ch.setVisible(!this.hideHeader));
+            with(getFont(), f -> f.deriveFont((float)f.getSize()));
+            revalidate();
             invokeLater(this::updateColumnPreferredWidths);
         });
     }
 
-    public void addTableSelectionListener(@NotNull TableSelectionListener listener) {
-        listeners.add(TableSelectionListener.class, listener);
+    public void addTableSelectionListener(@NotNull PGJTableSelectionListener listener) {
+        with(listeners, l -> l.add(PGJTableSelectionListener.class, listener));
     }
 
     public void clearSelection() {
-        dataTable.clearSelection();
+        with(table, JTable::clearSelection);
     }
 
     public void fireTableCellUpdated(int rowIndex, int columnIndex) {
-        dataModel.fireTableCellUpdated(rowIndex, columnIndex);
+        with(getTableModel(), o -> o.fireTableCellUpdated(rowIndex, columnIndex));
     }
 
     public void fireTableDataChanged() {
-        dataModel.fireTableDataChanged();
+        with(getTableModel(), AbstractTableModel::fireTableDataChanged);
     }
 
     public void fireTableRowDeleted(int rowIndex) {
@@ -131,78 +139,62 @@ public class PGJTable<T> extends JPanel implements NonGUIEditorCustomComponent {
     }
 
     public void fireTableRowsDeleted(int firstRow, int lastRow) {
-        dataModel.fireTableRowsDeleted(firstRow, lastRow);
+        with(getTableModel(), o -> o.fireTableRowsDeleted(firstRow, lastRow));
     }
 
     public double[] getColSizes() {
-        return colSizes;
+        return Objects.requireNonNullElseGet(colSizes, () -> new double[0]);
     }
 
     public TableColumn getColumn(int columnIndex) {
-        TableColumnModel columnModel = getColumnModel();
-        if(columnIndex < 0 || columnIndex >= columnModel.getColumnCount()) throw new IndexOutOfBoundsException(columnIndex);
-        return columnModel.getColumn(columnIndex);
+        return fromV(getColumnModel(), m -> {
+            if(columnIndex < 0 || columnIndex >= m.getColumnCount()) throw new IndexOutOfBoundsException(columnIndex);
+            return m.getColumn(columnIndex);
+        }, null);
     }
 
     public int getColumnCount() {
-        return getColumnModel().getColumnCount();
+        return fromV(getColumnModel(), TableColumnModel::getColumnCount, 0);
     }
 
     public TableColumnModel getColumnModel() {
-        return dataTable.getColumnModel();
+        return fromV(table, JTable::getColumnModel, null);
     }
 
-    public List<T> getDataList() {
-        return dataModel.getDataList();
+    public PGDataModel<T> getDataModel() {
+        return fromV(model, PGJTableModel::getDataModel, null);
     }
 
-    public DataModel<T> getDataModel() {
-        return dataModel;
+    public int getMaximumVisibleRows() {
+        return maximumVisibleRows;
     }
 
-    public DataRowModel<T> getDataRowModel() {
-        return dataModel.getRowModel();
+    public Dimension getPreferredScrollableViewportSize() {
+        return ((table == null) ? getPreferredSize() : getViewPortSize(table.getPreferredScrollableViewportSize()));
     }
 
-    public @Override @NotNull Dimension getMaximumSize() {
-        return getViewPortSize(super.getMaximumSize());
-    }
-
-    public @Override @NotNull Dimension getPreferredSize() {
-        return getViewPortSize(super.getPreferredSize());
+    public PGJTableRowModel<T> getRowModel() {
+        return fromV(model, PGJTableModel::getRowModel, null);
     }
 
     public List<T> getSelectedItems() {
-        List<T> data = getDataList();
-        return IntStream.of(getSelectedRows()).mapToObj(data::get).collect(Collectors.toList());
+        return from(getDataModel(), dm -> IntStream.of(getSelectedRows()).mapToObj(dm::get).toList(), ArrayList::new);
     }
 
     public int[] getSelectedRows() {
-        return dataModel.getSelectedRows(dataTable.getSelectionModel());
+        return from(table, JTable::getSelectedRows, () -> new int[0]);
     }
 
-    public int getSelectionMode() {
-        return dataTable.getSelectionModel().getSelectionMode();
+    public SelectionMode getSelectionMode() {
+        return fromV(getSelectionModel(), sm -> SelectionMode.valueOf(sm.getSelectionMode()), SelectionMode.Single);
     }
 
-    public @NotNull JTableImpl<T> getTable() {
-        return dataTable;
+    public ListSelectionModel getSelectionModel() {
+        return fromV(table, JTable::getSelectionModel, null);
     }
 
-    public Font getTableFont() {
-        return dataTable.getFont();
-    }
-
-    public Dimension getTablePreferredScrollableViewportSize() {
-        return dataTable.getPreferredScrollableViewportSize();
-    }
-
-    public Dimension getTableSize() {
-        return dataTable.getSize();
-    }
-
-    public int getVisibleRowCount() {
-        return visibleRowCount;
+    public PGJTableModel<T> getTableModel() {
+        return model;
     }
 
     public boolean isHeightMatchesRows() {
@@ -213,16 +205,16 @@ public class PGJTable<T> extends JPanel implements NonGUIEditorCustomComponent {
         return hideHeader;
     }
 
-    public void removeTableSelectionListener(@NotNull TableSelectionListener listener) {
-        listeners.remove(TableSelectionListener.class, listener);
+    public void removeTableSelectionListener(@NotNull PGJTableSelectionListener listener) {
+        with(listeners, l -> l.remove(PGJTableSelectionListener.class, listener));
     }
 
     public void setCellEditor(int columnIndex, @NotNull TableCellEditor editor) {
-        getColumn(columnIndex).setCellEditor(editor);
+        with(getColumn(columnIndex), c -> c.setCellEditor(editor));
     }
 
     public void setCellRenderer(int columnIndex, @NotNull TableCellRenderer renderer) {
-        getColumn(columnIndex).setCellRenderer(renderer);
+        with(getColumn(columnIndex), c -> c.setCellRenderer(renderer));
     }
 
     public void setColSizes(double @NotNull [] colSizes) {
@@ -230,91 +222,147 @@ public class PGJTable<T> extends JPanel implements NonGUIEditorCustomComponent {
         invokeLater(this::updateColumnPreferredWidths);
     }
 
-    public void setDataList(@NotNull List<T> aList) {
-        dataModel.setDataList(aList);
-        setTableSize();
-        dataTable.revalidate();
+    public void setData(@NotNull List<T> aList) {
+        setDataModel(new PGListDataModel<>(aList));
     }
 
-    public void setDataRowModel(@NotNull DataRowModel<T> dataRowModel) {
-        dataModel.setRowModel(dataRowModel);
+    public void setDataModel(PGListDataModel<T> dataModel) {
+        with(getTableModel(), o -> o.setDataModel(dataModel));
+        revalidate();
+        with(table, JComponent::revalidate);
     }
 
-    public void setSelectionMode(int mode) {
-        dataTable.setSelectionMode(mode);
-    }
-
-    public void setTableFont(@NotNull Font font) {
+    public @Override void setFont(@NotNull Font font) {
         invokeLater(() -> {
-            Font hf = new Font(font.getFamily(), (font.getStyle() | Font.BOLD), font.getSize());
-            dataTable.setFont(font);
-            dataTable.setRowHeight(getFontHeight(font) + 4);
-            dataTable.getTableHeader().setFont(hf);
-            dataTable.getTableHeader().setPreferredSize(new Dimension(1, getFontHeight(hf) + 6));
-            if(heightMatchesRows) setTableSize();
+            with(table, t -> {
+                super.setFont(font);
+                t.setFont(font);
+                t.setRowHeight(getFontHeight(font) + 4);
+
+                Font hf = font.deriveFont(Font.BOLD);
+                t.getTableHeader().setFont(hf);
+                t.getTableHeader().setPreferredSize(new Dimension(1, getFontHeight(hf) + 6));
+
+                if(heightMatchesRows) revalidate();
+            });
         });
     }
 
-    public void setTableFontSize(int size) {
-        setTableFont(Fonts.changeFontSize(getTableFont(), size));
+    public void setHeightMatchesRows(boolean heightMatchesRows) {
+        this.heightMatchesRows = heightMatchesRows;
+        setPreferredScrollableViewportSize(getPreferredScrollableViewportSize());
     }
 
-    public void setTableFontStyle(@MagicConstant(flags = { Font.PLAIN, Font.BOLD, Font.ITALIC }) int style) {
-        setTableFont(Fonts.changeFontStyle(getTableFont(), style));
-    }
-
-    public void setTableSize() {
+    public void setHideHeader(boolean hideHeader) {
+        this.hideHeader = hideHeader;
+        getColumnHeader().setVisible(!this.hideHeader);
         revalidate();
     }
 
-    public void setVisibleRowCount(int rows) {
-        visibleRowCount = rows;
-        setTableSize();
+    public void setMaximumVisibleRows(int rows) {
+        maximumVisibleRows = rows;
+        setPreferredScrollableViewportSize(getPreferredScrollableViewportSize());
+        revalidate();
     }
 
-    private int foo(int rows) {
-        return ((((dataTable.getRowHeight() + dataTable.getRowMargin()) * rows)) + scrollPane.getColumnHeader().getHeight());
-    }
-
-    private int getFontHeight(@NotNull Font font) {
-        FontMetrics m = getFontMetrics(font);
-        return (m.getMaxAscent() + m.getMaxDescent());
-    }
-
-    private @NotNull Dimension getViewPortSize(@NotNull Dimension defSize) {
-        return new Dimension(defSize.width, switch(vSizePolicy) {/*@f0*/
-            case None     -> defSize.height;
-            case FitsRows -> foo(Math.max(1, Math.min(visibleRowCount, dataTable.getModel().getRowCount())));
-            case Fixed    -> foo(Math.max(1, visibleRowCount));
-        });/*@f1*/
-    }
-
-    private void onSelected(ListSelectionEvent event) {
-        int[]               idx  = dataTable.getSelectionModel().getSelectedIndices();
-        List<T>             data = dataModel.getDataList();
-        TableSelectionEvent evt  = new TableSelectionEvent(this, idx, IntStream.of(idx).mapToObj(data::get).toList());
-        invokeLater(() -> listeners.fireEvent(TableSelectionListener.class, evt, TableSelectionListener::onSelection));
-    }
-
-    private void updateColumnPreferredWidths() {
-        if(colSizes.length > 0) {
-            TableColumnModel model        = dataTable.getColumnModel();
-            int              realColCount = model.getColumnCount();
-            int              workColCount = Math.min(colSizes.length, realColCount);
-            int              totalWidth   = model.getTotalColumnWidth();
-            int              widthAcc     = 0;
-
-            for(int c = 0; c < workColCount; c++) {
-                int cw = Math.max(1, (int)(totalWidth * colSizes[c]));
-                model.getColumn(c).setPreferredWidth(cw);
-                widthAcc += cw;
-            }
-            for(int c = workColCount; c < realColCount; c++) model.getColumn(c).setPreferredWidth((totalWidth - widthAcc) / (realColCount - workColCount));
-            invokeLater(() -> dataTable.revalidate());
+    public void setPreferredScrollableViewportSize(Dimension size) {
+        System.out.printf("%s: table: %s\n", "setPreferredScrollableViewportSize", foo01(table));
+        if(table != null) {
+            table.setPreferredScrollableViewportSize(getViewPortSize(size));
         }
     }
 
-    private static class DummyRowModel<T> extends AbstractDataRowModel<T> {
+    public void setRowModel(@NotNull PGJTableRowModel<T> rowModel) {
+        with(model, m -> m.setRowModel(rowModel));
+    }
+
+    public void setSelectionMode(@NotNull SelectionMode mode) {
+        with(table, o -> o.setSelectionMode(mode.getValue()));
+    }
+
+    public void setvSizePolicy(VSizePolicy vSizePolicy) {
+        this.vSizePolicy = vSizePolicy;
+        setPreferredScrollableViewportSize(getPreferredScrollableViewportSize());
+    }
+
+    public void withColumnModels(BiConsumer<Integer, TableColumn> biConsumer) {
+        withColumnModels(0, Integer.MAX_VALUE, biConsumer);
+    }
+
+    public void withColumnModels(int endIndex, BiConsumer<Integer, TableColumn> biConsumer) {
+        withColumnModels(0, endIndex, biConsumer);
+    }
+
+    public void withColumnModels(int startIndex, int endIndex, BiConsumer<Integer, TableColumn> biConsumer) {
+        with2(table, JTable::getColumnModel, model -> {
+            int cc    = model.getColumnCount();
+            int start = Math.max(0, Math.min(cc, Math.min(startIndex, endIndex)));
+            int end   = Math.max(0, Math.min(cc, Math.max(startIndex, endIndex)));
+            for(int i = start; i < end; i++) biConsumer.accept(i, model.getColumn(i));
+        });
+    }
+
+    private int calculateHeight(int rows) {
+        if(table == null) return (21 * rows);
+        return (((table.getRowHeight() + 4) * rows) + 5);
+    }
+
+    @Contract(pure = true) private @NotNull String foo01(Object arg) {
+        return ((arg == null) ? "null" : "not null");
+    }
+
+    private int getFontHeight(@NotNull Font font) {
+        return fromV(getFontMetrics(font), m -> (m.getMaxAscent() + m.getMaxDescent()), 0);
+    }
+
+    private @NotNull Dimension getViewPortSize(@NotNull Dimension sizeIn) {
+        Dimension sizeOut = new Dimension(sizeIn.width, switch(Objects.requireNonNullElse(vSizePolicy, VSizePolicy.None)) {
+            case None -> sizeIn.height;
+            case FitsRows -> {
+                if(table == null) {
+                    System.out.printf("%s: %s: %s\n", "getViewPortSize", "table", foo01(table));
+                    yield calculateHeight(maximumVisibleRows);
+                }
+                TableModel tableModel = table.getModel();
+                if(tableModel == null) {
+                    System.out.printf("%s: %s: %s\n", "getViewPortSize", "tableModel", foo01(tableModel));
+                    yield calculateHeight(maximumVisibleRows);
+                }
+                yield calculateHeight(Math.max(1, Math.min(maximumVisibleRows, tableModel.getRowCount())));
+            }
+            case Fixed -> calculateHeight(Math.max(1, maximumVisibleRows));
+        });
+        System.out.printf("%s: %s: (%,d, %,d)\n", "getViewPortSize", " sizeIn", sizeIn.width, sizeIn.height);
+        System.out.printf("%s: %s: (%,d, %,d)\n", "getViewPortSize", "sizeOut", sizeOut.width, sizeOut.height);
+        return sizeOut;
+    }
+
+    private void onSelected(ListSelectionEvent event) {
+        int[]                  idx  = ofNullable(table).map(JTable::getSelectionModel).map(ListSelectionModel::getSelectedIndices).orElseGet(() -> new int[0]);
+        PGDataModel<T>         data = ofNullable(model).map(PGJTableModel::getDataModel).orElseGet(PGListDataModel::new);
+        PGJTableSelectionEvent evt  = new PGJTableSelectionEvent(this, idx, IntStream.of(idx).mapToObj(data::get).toList());
+        with(listeners, l -> invokeLater(() -> l.fireEvent(PGJTableSelectionListener.class, evt, PGJTableSelectionListener::onSelection)));
+    }
+
+    private void updateColumnPreferredWidths() {
+        ifDo(getColSizes(), cs -> (cs.length > 0), cs -> with(getColumnModel(), cm -> {
+            int        diff       = (cm.getColumnCount() - Math.min(cs.length, cm.getColumnCount()));
+            int        totalWidth = cm.getTotalColumnWidth();
+            IntegerRef widthAcc   = new IntegerRef(0);
+
+            withColumnModels(cs.length, (c, column) -> {
+                int cw = Math.max(1, (int)(totalWidth * cs[c]));
+                column.setPreferredWidth(cw);
+                widthAcc.value += cw;
+            });
+            withColumnModels(cs.length, (c, column) -> column.setPreferredWidth((totalWidth - widthAcc.value) / diff));
+            with(table, t -> invokeLater(t::revalidate));
+        }));
+    }
+
+    static final class DummyRowModel<T> extends AbstractPGJTableRowModel<T> {
+
+        public static final String[] columnNames = { "Alpha", "Beta" };
 
         public DummyRowModel()                                                                  { super(); }
 
@@ -322,10 +370,40 @@ public class PGJTable<T> extends JPanel implements NonGUIEditorCustomComponent {
 
         public @Override Class<?> getColumnClass(int columnIndex)                               { return String.class; }
 
-        public @Override int getColumnCount()                                                   { return 1; }
+        public @Override int getColumnCount()                                                   { return columnNames.length; }
 
-        public @Contract(pure = true) @Override @Nullable String getColumnName(int columnIndex) { return ""; }
+        public @Contract(pure = true) @Override @Nullable String getColumnName(int columnIndex) { return columnNames[columnIndex]; }
 
-        public @Override @Nullable Object getColumnValue(@NotNull T obj, int columnIndex)       { return ""; }
+        public @Override @Nullable Object getColumnValue(@NotNull T obj, int columnIndex)       { return ((DummyData)obj).data[columnIndex]; }
+
+        static final class DummyDataModel<T> implements PGDataModel<T> {
+
+            private final List<T> data = DummyData.getDummyData();
+
+            public DummyDataModel()                                                    { }
+
+            @Override public void forEach(@NotNull Consumer<? super T> consumer)       { data.forEach(consumer); }
+
+            @Override public T get(@Range(from = 0, to = Integer.MAX_VALUE) int index) { return data.get(index); }
+
+            @Override public int size()                                                { return data.size(); }
+
+            @Override public @NotNull Stream<T> stream()                               { return data.stream(); }
+
+            public static final class DummyData {
+                public final String[] data;
+
+                public DummyData(int row) {
+                    String[] names = DummyRowModel.columnNames;
+                    data = new String[names.length];
+                    for(int c = 0; c < names.length; c++) data[c] = "%s Row %d".formatted(names[c], row);
+                }
+
+                public static <T> List<T> getDummyData() {
+                    //noinspection unchecked
+                    return (List<T>)IntStream.range(0, 4).mapToObj(DummyData::new).toList();
+                }
+            }
+        }
     }
 }

@@ -18,13 +18,13 @@ import java.util.concurrent.Future;
 @SuppressWarnings("unused")
 public class ProgressDialog extends JDialog implements ProgressReporter {
 
-    protected JPanel         contentPane;
-    protected JButton        buttonOK;
-    protected JProgressBar   progressBar;
-    protected JLabel         message;
-    protected UIButtonChoice buttonChoice = UIButtonChoice.None;
-    protected JLabel         finalMessageLabel;
-    private static Method    $$$cachedGetBundleMethod$$$ = null;
+    protected      JPanel         contentPane;
+    protected      JButton        buttonOK;
+    protected      JProgressBar   progressBar;
+    protected      JLabel         message;
+    protected      UIButtonChoice buttonChoice                = UIButtonChoice.None;
+    protected      JLabel         finalMessageLabel;
+    private static Method         $$$cachedGetBundleMethod$$$ = null;
 
     public ProgressDialog(@NotNull String title,
                           @NotNull String message,

@@ -52,8 +52,7 @@ public final class Fonts {
     }
 
     public static @NotNull Font changeFont(@NotNull Font font, int style, int size) {
-        if((size == font.getSize()) && (style == font.getStyle())) return font;
-        return new Font(font.getFamily(), style, size);
+        return font.deriveFont(style, (float)size);
     }
 
     public static @NotNull Font changeFontSize(@NotNull Font font, int newSize) {

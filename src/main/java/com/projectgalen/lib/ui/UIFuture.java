@@ -43,13 +43,11 @@ public final class UIFuture<T> implements Future<T> {
         SwingUtilities.invokeLater(this::invokeCallable);
     }
 
-    @Override
-    public boolean cancel(boolean mayInterruptIfRunning) {
+    public @Override boolean cancel(boolean mayInterruptIfRunning) {
         return false;
     }
 
-    @Override
-    public @Nullable T get() throws InterruptedException, ExecutionException {
+    public @Override @Nullable T get() throws InterruptedException, ExecutionException {
         synchronized(lockObject) {
             while(!done) lockObject.wait();
             return _get();
@@ -57,8 +55,7 @@ public final class UIFuture<T> implements Future<T> {
     }
 
     @Contract(pure = true)
-    @Override
-    public @Nullable T get(long timeout, @NotNull TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+    public @Override @Nullable T get(long timeout, @NotNull TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
         if(timeout < 0) throw new IllegalArgumentException(M.msgs.getString("msg.err.timeout_lessthan_zero"));
         long millis = unit.toMillis(timeout);
 
@@ -74,13 +71,11 @@ public final class UIFuture<T> implements Future<T> {
         }
     }
 
-    @Override
-    public boolean isCancelled() {
+    public @Override boolean isCancelled() {
         return false;
     }
 
-    @Override
-    public boolean isDone() {
+    public @Override boolean isDone() {
         synchronized(lockObject) { return done; }
     }
 
