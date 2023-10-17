@@ -38,15 +38,15 @@ public class PGJTableImpl<T> extends JTable {
 
     public static final Border EMPTY_BORDER = BorderFactory.createEmptyBorder(1, 1, 1, 1);
 
-    public PGJTableImpl(@Nullable PGJTableModel<T> tableModel, boolean fillsViewportHeight, boolean cellSelectionEnabled, boolean columnSelectionAllowed, boolean rowSelectionAllowed) {
+    public PGJTableImpl(@Nullable PGJTableModel<T> tableModel) {
         super(tableModel);
         setDoubleBuffered(true);
         setDefaultRenderer(BigDecimal.class, new CurrencyCellRenderer());
         setDefaultEditor(BigDecimal.class, new CurrencyCellEditor());
-        setFillsViewportHeight(fillsViewportHeight);
-        setCellSelectionEnabled(cellSelectionEnabled);
-        setColumnSelectionAllowed(columnSelectionAllowed);
-        setRowSelectionAllowed(rowSelectionAllowed);
+        setFillsViewportHeight(true);
+        setCellSelectionEnabled(true);
+        setColumnSelectionAllowed(true);
+        setRowSelectionAllowed(true);
     }
 
     public @Override Component prepareEditor(TableCellEditor editor, int row, int column) {

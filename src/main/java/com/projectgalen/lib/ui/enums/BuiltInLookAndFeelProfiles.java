@@ -28,7 +28,9 @@ public enum BuiltInLookAndFeelProfiles {
     Nimbus("javax.swing.plaf.nimbus.NimbusLookAndFeel"),
     Metal("javax.swing.plaf.metal.MetalLookAndFeel"),
     Motif("com.sun.java.swing.plaf.motif.MotifLookAndFeel"),
-    Aqual("com.apple.laf.AquaLookAndFeel");
+    Aqual("com.apple.laf.AquaLookAndFeel"),
+    Windows("com.sun.java.swing.plaf.windows.WindowsLookAndFeel"),
+    WindowsClassic("com.sun.java.swing.plaf.windows.WindowsClassicLookAndFeel");
 
     private final @NotNull String className;
 

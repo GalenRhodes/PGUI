@@ -1,4 +1,4 @@
-package com.projectgalen.lib.ui.components.table.test;
+package com.projectgalen.lib.ui.test;
 
 // ===========================================================================
 //     PROJECT: PGUI

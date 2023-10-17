@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="TableTest" type="Application" factoryName="Application" nameIsGenerated="true">
-    <option name="MAIN_CLASS_NAME" value="com.projectgalen.lib.ui.components.table.test.TableTest" />
+  <configuration default="false" name="TableTest" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="com.projectgalen.lib.ui.test.TableTest" />
     <module name="PGUI" />
     <option name="VM_PARAMETERS" value="-Dsun.java2d.metal=true -Dsun.java2d.opengl=false -Dfile.encoding=UTF-8 -Duser.timezone=US/Eastern -Duser.country=US -Duser.language=en" />
     <extension name="coverage">
@@ -11,6 +11,7 @@
     </extension>
     <method v="2">
       <option name="Maven.BeforeRunTask" enabled="true" file="$PROJECT_DIR$/pom.xml" goal="clean deploy" />
+      <option name="MakeProject" enabled="true" />
     </method>
   </configuration>
 </component>
