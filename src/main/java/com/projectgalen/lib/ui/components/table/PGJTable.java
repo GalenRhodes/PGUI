@@ -47,8 +47,8 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
     protected       int            totalRowHeightTune = 0;
     protected       double[]       columnSizeWeights  = new double[0];
     protected       VSizePolicy    verticalSizePolicy = None;
-    protected       Font           aFont;
-    protected       Font           aHeaderFont;
+    protected       Font           cellFont;
+    protected       Font           headerFont;
 
     public PGJTable() {
         this(new PGJTableModel<>(new DummyRowModel<>(), new DummyDataSupplier<>()), null, null, 0, null, null, false);
@@ -123,7 +123,7 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
         this.verticalSizePolicy = Objects.requireNonNullElse(verticalSizePolicy, this.verticalSizePolicy);
         this.columnSizeWeights  = Objects.requireNonNullElse(columnSizeWeights, this.columnSizeWeights);
 
-        setFont(aFont = Objects.requireNonNullElseGet(font, () -> getTable().getFont()));
+        setFont(cellFont = Objects.requireNonNullElseGet(font, () -> getTable().getFont()));
         setSelectionMode(Objects.requireNonNullElseGet(selectionMode, this::getSelectionMode));
         with(getSelectionModel(), m -> m.addListSelectionListener(this::onSelected));
 
@@ -305,7 +305,7 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
     }
 
     public @Override Font getFont() {
-        return aFont;
+        return cellFont;
     }
 
     public Color getGridColor() {
@@ -580,17 +580,17 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
 
     public @Override void setFont(@NotNull Font font) {
         if(SwingUtilities.isEventDispatchThread()) {
-            aFont       = font;
-            aHeaderFont = aFont.deriveFont(Font.BOLD);
+            cellFont   = font;
+            headerFont = cellFont.deriveFont(Font.BOLD);
 
             with(getTable(), table -> {
-                super.setFont(aFont);
-                table.setFont(aFont);
-                table.setRowHeight(aRowHeight = (getFontHeight(aFont) + 4 + table.getRowMargin()));
+                super.setFont(cellFont);
+                table.setFont(cellFont);
+                table.setRowHeight(aRowHeight = (getFontHeight(cellFont) + 4 + table.getRowMargin()));
 
                 with(table.getTableHeader(), header -> {
-                    header.setFont(aHeaderFont);
-                    header.setPreferredSize(new Dimension(1, aHeaderRowHeight = (getFontHeight(aHeaderFont) + 4)));
+                    header.setFont(headerFont);
+                    header.setPreferredSize(new Dimension(1, aHeaderRowHeight = (getFontHeight(headerFont) + 4)));
                 });
 
                 resizeTable();
