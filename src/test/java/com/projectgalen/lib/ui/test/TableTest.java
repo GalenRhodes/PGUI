@@ -2,7 +2,6 @@ package com.projectgalen.lib.ui.test;
 
 import com.projectgalen.lib.ui.UI;
 import com.projectgalen.lib.ui.components.table.PGJTable;
-import com.projectgalen.lib.ui.enums.BuiltInLookAndFeelProfiles;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -48,13 +47,13 @@ public class TableTest extends JFrame {
     }
 
     public static void main(String[] args) {
-        // try { UI.setFlatLaf(); } catch(UnsupportedLookAndFeelException e) { e.printStackTrace(System.err); }
+        try { UI.setFlatLaf(); } catch(UnsupportedLookAndFeelException e) { e.printStackTrace(System.err); }
         // try { UI.setLookAndFeel(BuiltInLookAndFeelProfiles.Nimbus); } catch(Exception e) { e.printStackTrace(System.err); }
         // try { UI.setLookAndFeel(BuiltInLookAndFeelProfiles.Motif); } catch(Exception e) { e.printStackTrace(System.err); }
         // try { UI.setLookAndFeel(BuiltInLookAndFeelProfiles.Aqual); } catch(Exception e) { e.printStackTrace(System.err); }
         // try { UI.setLookAndFeel(BuiltInLookAndFeelProfiles.Metal); } catch(Exception e) { e.printStackTrace(System.err); }
         // try { UI.setLookAndFeel(BuiltInLookAndFeelProfiles.Windows); } catch(Exception e) { e.printStackTrace(System.err); }
-        try { UI.setLookAndFeel(BuiltInLookAndFeelProfiles.WindowsClassic); } catch(Exception e) { e.printStackTrace(System.err); }
+        // try { UI.setLookAndFeel(BuiltInLookAndFeelProfiles.WindowsClassic); } catch(Exception e) { e.printStackTrace(System.err); }
 
         for(LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
             System.out.printf("%20s -> %s\n", info.getName(), info.getClassName());
@@ -73,7 +72,7 @@ public class TableTest extends JFrame {
     private static void dumpUIDefaults(@SuppressWarnings("SameParameterValue") boolean toConsole) {
         if(toConsole) dumpUIDefaults(new PrintWriter(System.out));
         else {
-            String fileName = "UIManager_keys_%s.txt".formatted(UIManager.getLookAndFeel().getName());
+            String fileName = "UIManager_keys_%s.txt".formatted(UIManager.getLookAndFeel().getName().replaceAll("/", "_").replaceAll("\\\\", "_"));
             try(PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream("documentation/%s".formatted(fileName)), StandardCharsets.UTF_8))) {
                 dumpUIDefaults(writer);
             }
