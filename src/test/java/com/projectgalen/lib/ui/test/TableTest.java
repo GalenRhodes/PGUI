@@ -2,6 +2,7 @@ package com.projectgalen.lib.ui.test;
 
 import com.projectgalen.lib.ui.UI;
 import com.projectgalen.lib.ui.components.table.PGJTable;
+import com.projectgalen.lib.utils.refs.IntegerRef;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -20,28 +21,31 @@ import java.util.Objects;
 import java.util.TreeMap;
 
 public class TableTest extends JFrame {
-    private   JPanel             contentPane;
-    private   JButton            buttonOK;
-    private   JButton            buttonCancel;
+    public static final int TEST_RECORD_COUNT = 1000;
+
+    protected JPanel  contentPane;
+    protected JButton quitButton;
+    protected JButton packButton;
     protected PGJTable<TestData> table;
 
     public TableTest(@NotNull List<TestData> testData) {
         setContentPane(contentPane);
-        getRootPane().setDefaultButton(buttonOK);
-        buttonOK.addActionListener(e -> onOK());
-        buttonCancel.addActionListener(e -> onCancel());
+        getRootPane().setDefaultButton(quitButton);
+        quitButton.addActionListener(e -> onQuit());
+        packButton.addActionListener(e -> onPack());
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         addWindowListener(new MyWindowAdapter());
-        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        contentPane.registerKeyboardAction(e -> onPack(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         table.setRowModel(new TestRowModel());
         table.setData(testData);
+        SwingUtilities.invokeLater(() -> table.setColumnSizePercentages(new double[] { 0.5, 0.1, 0.2 }));
     }
 
-    private void onCancel() {
+    private void onPack() {
         pack();
     }
 
-    private void onOK() {
+    private void onQuit() {
         dispose();
         System.exit(0);
     }
@@ -55,18 +59,20 @@ public class TableTest extends JFrame {
         // try { UI.setLookAndFeel(BuiltInLookAndFeelProfiles.Windows); } catch(Exception e) { e.printStackTrace(System.err); }
         // try { UI.setLookAndFeel(BuiltInLookAndFeelProfiles.WindowsClassic); } catch(Exception e) { e.printStackTrace(System.err); }
 
-        for(LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-            System.out.printf("%20s -> %s\n", info.getName(), info.getClassName());
-        }
-        System.out.print('\n');
         SwingUtilities.invokeLater(() -> {
-            TableTest window = new TableTest(TestData.createTestData(7));
+            TableTest window = new TableTest(TestData.createTestData(TEST_RECORD_COUNT));
             window.pack();
             window.setLocationRelativeTo(null);
             window.setVisible(true);
-            //dumpUIDefaults(true);
-            dumpUIDefaults(false);
         });
+        // SwingUtilities.invokeLater(TableTest::dumpAvailableLafs);
+        // SwingUtilities.invokeLater(() -> dumpUIDefaults(true));
+        // SwingUtilities.invokeLater(() -> dumpUIDefaults(false));
+    }
+
+    private static void dumpAvailableLafs() {
+        for(LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) System.out.printf("%20s -> %s\n", info.getName(), info.getClassName());
+        System.out.print('\n');
     }
 
     private static void dumpUIDefaults(@SuppressWarnings("SameParameterValue") boolean toConsole) {
@@ -83,23 +89,29 @@ public class TableTest extends JFrame {
     }
 
     private static void dumpUIDefaults(PrintWriter writer) {
-        int          maxA    = 0;
-        int          maxB    = 0;
-        List<String> allKeys = UIManager.getDefaults().keySet().stream().map(o -> Objects.toString(o, "")).sorted().toList();
-        // List<String>        allKeys = UIManager.getDefaults().keySet().stream().map(o -> Objects.toString(o, "")).filter(k -> (k.startsWith("Table.") || k.startsWith("Label."))).sorted().toList();
-        Map<String, String> map = new TreeMap<>();
+        new Thread(() -> {
+            try {
+                IntegerRef          maxA = IntegerRef.getReference(0);
+                IntegerRef          maxB = IntegerRef.getReference(0);
+                Map<String, String> map  = new TreeMap<>();
 
-        for(String key : allKeys) {
-            String value = Objects.toString(UIManager.get(key)).replaceAll("(\\r\\n|\\r|\\n)", " ").replaceAll("\\t", " ");
-            map.put(key, value);
-            maxA = Math.max(maxA, key.length());
-            maxB = Math.max(maxB, value.length());
-        }
-        String fmt = "| %%%ds | %%-%ds |\n".formatted(maxA, maxB);
+                UIManager.getDefaults().keySet().stream().map(Objects::toString).forEach(key -> {
+                    String value = Objects.toString(UIManager.get(key)).replaceAll("(\\r\\n|\\r|\\n|\\t)", " ");
+                    map.put(key, value);
+                    maxA.setMax(key.length());
+                    maxB.setMax(value.length());
+                });
+                String fmt = "| %%%ds | %%-%ds |\n".formatted(maxA.value, maxB.value);
+                String bar = "+-%s-+-%s-+\n".formatted("-".repeat(maxA.value), "-".repeat(maxB.value));
 
-        writer.printf("+-%s-+-%s-+\n", "-".repeat(maxA), "-".repeat(maxB));
-        for(String key : allKeys) writer.printf(fmt, key, map.get(key));
-        writer.printf("+-%s-+-%s-+\n", "-".repeat(maxA), "-".repeat(maxB));
+                writer.print(bar);
+                map.forEach((key, value) -> writer.printf(fmt, key, value));
+                writer.print(bar);
+            }
+            finally {
+                writer.flush();
+            }
+        }).start();
     }
 
     private final class MyWindowAdapter extends WindowAdapter {

@@ -49,6 +49,7 @@ public class PGJTableImpl<T> extends JTable {
         setCellSelectionEnabled(true);
         setColumnSelectionAllowed(true);
         setRowSelectionAllowed(true);
+        getTableHeader().setReorderingAllowed(false);
     }
 
     public @Override Component prepareEditor(TableCellEditor editor, int row, int column) {

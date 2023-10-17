@@ -7,20 +7,20 @@ import com.projectgalen.lib.ui.components.table.misc.*;
 import com.projectgalen.lib.ui.interfaces.PGDataSupplier;
 import com.projectgalen.lib.utils.EventListeners;
 import com.projectgalen.lib.utils.NullTools;
-import com.projectgalen.lib.utils.refs.IntegerRef;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
 import javax.swing.*;
+import javax.swing.event.AncestorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.TableColumnModelEvent;
 import javax.swing.table.*;
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
+import java.awt.event.*;
+import java.beans.PropertyChangeListener;
+import java.util.Collections;
 import java.util.EventObject;
 import java.util.List;
 import java.util.Objects;
@@ -30,23 +30,22 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.projectgalen.lib.ui.components.table.VSizePolicy.None;
-import static java.util.Optional.ofNullable;
 import static javax.swing.SwingUtilities.invokeLater;
 
 @SuppressWarnings("unused")
 public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomComponent, NullTools {
 
-    protected static final int DEFAULT_ROW_HEIGHT = 20;
+    protected static final int      DEFAULT_ROW_HEIGHT = 20;
+    protected static final int[]    EMPTY_INT_ARRAY    = new int[0];
+    protected static final double[] EMPTY_DOUBLE_ARRAY = new double[0];
 
-    protected final EventListeners listeners          = new EventListeners();
+    protected final EventListeners listeners             = new EventListeners();
     protected       boolean        hideHeader;
     protected       int            aRowHeight;
     protected       int            aHeaderRowHeight;
-    protected       int            maximumVisibleRows = Integer.MAX_VALUE;
-    protected       int            rowHeightTune      = 0;
-    protected       int            totalRowHeightTune = 0;
-    protected       double[]       columnSizeWeights  = new double[0];
-    protected       VSizePolicy    verticalSizePolicy = None;
+    protected       int            maximumVisibleRows    = Integer.MAX_VALUE;
+    protected       double[]       columnSizePercentages = EMPTY_DOUBLE_ARRAY;
+    protected       VSizePolicy    verticalSizePolicy    = None;
     protected       Font           cellFont;
     protected       Font           headerFont;
 
@@ -80,35 +79,35 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
 
     public PGJTable(@NotNull PGJTableModel<T> model,
                     @Nullable SelectionMode selectionMode,
-                    double @Nullable [] columnSizeWeights,
+                    double @Nullable [] columnSizePercentages,
                     @Range(from = 0, to = Integer.MAX_VALUE) int maximumVisibleRows,
                     @Nullable VSizePolicy verticalSizePolicy,
                     boolean hideHeader) {
-        this(model, selectionMode, columnSizeWeights, maximumVisibleRows, verticalSizePolicy, null, hideHeader);
+        this(model, selectionMode, columnSizePercentages, maximumVisibleRows, verticalSizePolicy, null, hideHeader);
     }
 
     public PGJTable(@NotNull PGJTableRowModel<T> rowModel,
                     @Nullable SelectionMode selectionMode,
-                    double @Nullable [] columnSizeWeights,
+                    double @Nullable [] columnSizePercentages,
                     @Range(from = 0, to = Integer.MAX_VALUE) int maximumVisibleRows,
                     @Nullable VSizePolicy verticalSizePolicy,
                     boolean hideHeader) {
-        this(rowModel, selectionMode, columnSizeWeights, maximumVisibleRows, verticalSizePolicy, null, hideHeader);
+        this(rowModel, selectionMode, columnSizePercentages, maximumVisibleRows, verticalSizePolicy, null, hideHeader);
     }
 
     public PGJTable(@NotNull PGJTableRowModel<T> rowModel,
                     @Nullable SelectionMode selectionMode,
-                    double @Nullable [] columnSizeWeights,
+                    double @Nullable [] columnSizePercentages,
                     @Range(from = 0, to = Integer.MAX_VALUE) int maximumVisibleRows,
                     @Nullable VSizePolicy verticalSizePolicy,
                     @Nullable Font font,
                     boolean hideHeader) {
-        this(new PGJTableModel<>(rowModel), selectionMode, columnSizeWeights, maximumVisibleRows, verticalSizePolicy, font, hideHeader);
+        this(new PGJTableModel<>(rowModel), selectionMode, columnSizePercentages, maximumVisibleRows, verticalSizePolicy, font, hideHeader);
     }
 
     public PGJTable(@NotNull PGJTableModel<T> model,
                     @Nullable SelectionMode selectionMode,
-                    double @Nullable [] columnSizeWeights,
+                    double @Nullable [] columnSizePercentages,
                     @Range(from = 0, to = Integer.MAX_VALUE) int maximumVisibleRows,
                     @Nullable VSizePolicy verticalSizePolicy,
                     @Nullable Font font,
@@ -117,22 +116,68 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
         super(new PGJTableImpl<>(model));
         setDoubleBuffered(true);
 
-        this.hideHeader = hideHeader;
-
         if(maximumVisibleRows > 0) this.maximumVisibleRows = maximumVisibleRows;
-        this.verticalSizePolicy = Objects.requireNonNullElse(verticalSizePolicy, this.verticalSizePolicy);
-        this.columnSizeWeights  = Objects.requireNonNullElse(columnSizeWeights, this.columnSizeWeights);
+        this.verticalSizePolicy    = Objects.requireNonNullElse(verticalSizePolicy, this.verticalSizePolicy);
+        this.columnSizePercentages = Objects.requireNonNullElse(columnSizePercentages, this.columnSizePercentages);
 
         setFont(cellFont = Objects.requireNonNullElseGet(font, () -> getTable().getFont()));
         setSelectionMode(Objects.requireNonNullElseGet(selectionMode, this::getSelectionMode));
         with(getSelectionModel(), m -> m.addListSelectionListener(this::onSelected));
+        getModel().addTableModelListener(e -> resizeTable());
+        invokeLater(() -> setHideHeader(hideHeader));
+        invokeLater(this::updateColumnPreferredWidths);
+    }
 
-        invokeLater(() -> {
-            getModel().addTableModelListener(e -> revalidate());
-            getColumnHeader().setVisible(!hideHeader);
-            updateColumnPreferredWidths();
-            revalidate();
-        });
+    public @Override void addAncestorListener(AncestorListener listener) {
+        with(getTable(), table -> table.addAncestorListener(listener));
+    }
+
+    public @Override synchronized void addComponentListener(ComponentListener l) {
+        with(getTable(), table -> table.addComponentListener(l));
+    }
+
+    public @Override synchronized void addContainerListener(ContainerListener l) {
+        with(getTable(), table -> table.addContainerListener(l));
+    }
+
+    public @Override synchronized void addFocusListener(FocusListener l) {
+        with(getTable(), table -> table.addFocusListener(l));
+    }
+
+    public @Override void addHierarchyBoundsListener(HierarchyBoundsListener l) {
+        with(getTable(), table -> table.addHierarchyBoundsListener(l));
+    }
+
+    public @Override void addHierarchyListener(HierarchyListener l) {
+        with(getTable(), table -> table.addHierarchyListener(l));
+    }
+
+    public @Override synchronized void addInputMethodListener(InputMethodListener l) {
+        with(getTable(), table -> table.addInputMethodListener(l));
+    }
+
+    public @Override synchronized void addKeyListener(KeyListener l) {
+        with(getTable(), table -> table.addKeyListener(l));
+    }
+
+    public @Override synchronized void addMouseListener(MouseListener l) {
+        with(getTable(), table -> table.addMouseListener(l));
+    }
+
+    public @Override synchronized void addMouseMotionListener(MouseMotionListener l) {
+        with(getTable(), table -> table.addMouseMotionListener(l));
+    }
+
+    public @Override synchronized void addMouseWheelListener(MouseWheelListener l) {
+        with(getTable(), table -> table.addMouseWheelListener(l));
+    }
+
+    public @Override void addPropertyChangeListener(PropertyChangeListener listener) {
+        with(getTable(), table -> table.addPropertyChangeListener(listener));
+    }
+
+    public @Override void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
+        with(getTable(), table -> table.addPropertyChangeListener(propertyName, listener));
     }
 
     public void addRowSelectionInterval(int index0, int index1) {
@@ -153,22 +198,6 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
 
     public int columnAtPoint(@NotNull Point point) {
         return fromV(getTable(), table -> table.columnAtPoint(point), 0);
-    }
-
-    public void columnMarginChanged(ChangeEvent e) {
-        with(getTable(), table -> table.columnMarginChanged(e));
-    }
-
-    public void columnMoved(TableColumnModelEvent e) {
-        with(getTable(), table -> table.columnMoved(e));
-    }
-
-    public void columnRemoved(TableColumnModelEvent e) {
-        with(getTable(), table -> table.columnRemoved(e));
-    }
-
-    public void columnSelectionChanged(ListSelectionEvent e) {
-        with(getTable(), table -> table.columnSelectionChanged(e));
     }
 
     public boolean editCellAt(int row, int column) {
@@ -207,8 +236,8 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
         forEachColumn(0, Integer.MAX_VALUE, biConsumer);
     }
 
-    public void forEachColumn(int endIndex, BiConsumer<Integer, TableColumn> biConsumer) {
-        forEachColumn(0, endIndex, biConsumer);
+    public void forEachColumn(int startIndex, BiConsumer<Integer, TableColumn> biConsumer) {
+        forEachColumn(startIndex, Integer.MAX_VALUE, biConsumer);
     }
 
     public void forEachColumn(int startIndex, int endIndex, BiConsumer<Integer, TableColumn> biConsumer) {
@@ -272,8 +301,8 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
         return fromV(getTable(), JTable::getColumnSelectionAllowed, false);
     }
 
-    public double[] getColumnSizeWeights() {
-        return Objects.requireNonNullElseGet(columnSizeWeights, () -> new double[0]);
+    public double[] getColumnSizePercentages() {
+        return Objects.requireNonNullElseGet(columnSizePercentages, () -> EMPTY_DOUBLE_ARRAY);
     }
 
     public PGDataSupplier<T> getDataSupplier() {
@@ -336,10 +365,6 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
         return fromV(getTable(), table -> table.getRowHeight(row), 0);
     }
 
-    public int getRowHeightTune() {
-        return rowHeightTune;
-    }
-
     public int getRowMargin() {
         return fromV(getTable(), JTable::getRowMargin, 0);
     }
@@ -381,11 +406,11 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
     }
 
     public int[] getSelectedColumns() {
-        return fromV(getTable(), JTable::getSelectedColumns, new int[0]);
+        return fromV(getTable(), JTable::getSelectedColumns, EMPTY_INT_ARRAY);
     }
 
     public List<T> getSelectedItems() {
-        return from(getDataSupplier(), dm -> IntStream.of(getSelectedRows()).mapToObj(dm::get).toList(), ArrayList::new);
+        return from(getDataSupplier(), dm -> IntStream.of(getSelectedRows()).mapToObj(dm::get).toList(), Collections::emptyList);
     }
 
     public int getSelectedRow() {
@@ -397,7 +422,7 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
     }
 
     public int[] getSelectedRows() {
-        return from(getTable(), JTable::getSelectedRows, () -> new int[0]);
+        return fromV(getTable(), JTable::getSelectedRows, EMPTY_INT_ARRAY);
     }
 
     public Color getSelectionBackground() {
@@ -444,10 +469,6 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
         return fromV(getTable(), table -> table.getToolTipText(event), null);
     }
 
-    public int getTotalRowHeightTune() {
-        return totalRowHeightTune;
-    }
-
     public boolean getUpdateSelectionOnSort() {
         return fromV(getTable(), JTable::getUpdateSelectionOnSort, false);
     }
@@ -488,8 +509,60 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
         with(getTable(), table -> table.moveColumn(column, targetColumn));
     }
 
+    public @Override void removeAncestorListener(AncestorListener listener) {
+        with(getTable(), table -> table.removeAncestorListener(listener));
+    }
+
+    public @Override synchronized void removeComponentListener(ComponentListener l) {
+        with(getTable(), table -> table.removeComponentListener(l));
+    }
+
+    public @Override synchronized void removeContainerListener(ContainerListener l) {
+        with(getTable(), table -> table.removeContainerListener(l));
+    }
+
     public void removeEditor() {
         with(getTable(), JTable::removeEditor);
+    }
+
+    public @Override synchronized void removeFocusListener(FocusListener l) {
+        with(getTable(), table -> table.removeFocusListener(l));
+    }
+
+    public @Override void removeHierarchyBoundsListener(HierarchyBoundsListener l) {
+        with(getTable(), table -> table.removeHierarchyBoundsListener(l));
+    }
+
+    public @Override void removeHierarchyListener(HierarchyListener l) {
+        with(getTable(), table -> table.removeHierarchyListener(l));
+    }
+
+    public @Override synchronized void removeInputMethodListener(InputMethodListener l) {
+        with(getTable(), table -> table.removeInputMethodListener(l));
+    }
+
+    public @Override synchronized void removeKeyListener(KeyListener l) {
+        with(getTable(), table -> table.removeKeyListener(l));
+    }
+
+    public @Override synchronized void removeMouseListener(MouseListener l) {
+        with(getTable(), table -> table.removeMouseListener(l));
+    }
+
+    public @Override synchronized void removeMouseMotionListener(MouseMotionListener l) {
+        with(getTable(), table -> table.removeMouseMotionListener(l));
+    }
+
+    public @Override synchronized void removeMouseWheelListener(MouseWheelListener l) {
+        with(getTable(), table -> table.removeMouseWheelListener(l));
+    }
+
+    public @Override void removePropertyChangeListener(PropertyChangeListener listener) {
+        with(getTable(), table -> table.removePropertyChangeListener(listener));
+    }
+
+    public @Override void removePropertyChangeListener(String propertyName, PropertyChangeListener listener) {
+        with(getTable(), table -> table.removePropertyChangeListener(propertyName, listener));
     }
 
     public void removeRowSelectionInterval(int index0, int index1) {
@@ -540,8 +613,8 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
         with(getTable(), table -> table.setColumnSelectionInterval(index0, index1));
     }
 
-    public void setColumnSizeWeights(double @NotNull [] columnSizeWeights) {
-        this.columnSizeWeights = columnSizeWeights;
+    public void setColumnSizePercentages(double @NotNull [] columnSizePercentages) {
+        this.columnSizePercentages = columnSizePercentages;
         invokeLater(this::updateColumnPreferredWidths);
     }
 
@@ -635,11 +708,6 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
         with(getTable(), table -> table.setRowHeight(row, rowHeight));
     }
 
-    public void setRowHeightTune(int rowHeightTune) {
-        this.rowHeightTune = rowHeightTune;
-        resizeTable();
-    }
-
     public void setRowMargin(int rowMargin) {
         with(getTable(), table -> table.setRowMargin(rowMargin));
     }
@@ -693,11 +761,6 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
         with(getTable(), table -> table.setToolTipText(text));
     }
 
-    public void setTotalRowHeightTune(int totalRowHeightTune) {
-        this.totalRowHeightTune = totalRowHeightTune;
-        resizeTable();
-    }
-
     public void setUpdateSelectionOnSort(boolean update) {
         with(getTable(), table -> table.setUpdateSelectionOnSort(update));
     }
@@ -723,11 +786,15 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
         return (PGJTableImpl<T>)fromV(getViewport(), JViewport::getView, null);
     }
 
-    private void onSelected(ListSelectionEvent event) {
-        int[]             idx  = ofNullable(getTable()).map(JTable::getSelectionModel).map(ListSelectionModel::getSelectedIndices).orElseGet(() -> new int[0]);
-        PGDataSupplier<T> data = ofNullable(getModel()).map(PGJTableModel::getDataSupplier).orElseGet(PGListDataSupplier::new);
-        PGJTableSelectionEvent evt  = new PGJTableSelectionEvent(this, idx, IntStream.of(idx).mapToObj(data::get).toList());
-        with(listeners, l -> invokeLater(() -> l.fireEvent(PGJTableSelectionListener.class, evt, PGJTableSelectionListener::onSelection)));
+    private void onSelected(@NotNull ListSelectionEvent e) {
+        if(!e.getValueIsAdjusting()) {
+            PGDataSupplier<T>      dataSupplier = getDataSupplier();
+            int[]                  rows         = getSelectedRows();
+            int[]                  cols         = getSelectedColumns();
+            List<T>                items        = IntStream.of(rows).mapToObj(dataSupplier::get).toList();
+            PGJTableSelectionEvent event        = new PGJTableSelectionEvent(this, rows, cols, items);
+            listeners.fireEvent(PGJTableSelectionListener.class, event, PGJTableSelectionListener::onSelection);
+        }
     }
 
     private void resizeTable() {
@@ -735,19 +802,27 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
     }
 
     private void updateColumnPreferredWidths() {
-        ifDo(getColumnSizeWeights(), cs -> (cs.length > 0), cs -> with(getColumnModel(), cm -> {
-            int        diff       = (cm.getColumnCount() - Math.min(cs.length, cm.getColumnCount()));
-            int        totalWidth = cm.getTotalColumnWidth();
-            IntegerRef widthAcc   = new IntegerRef(0);
+        double[]         cs = getColumnSizePercentages();
+        TableColumnModel cm = getColumnModel();
 
-            forEachColumn(cs.length, (c, column) -> {
+        if((cm != null) && (cs.length > 0)) {
+            int colCount   = cm.getColumnCount();
+            int diff       = (colCount - Math.min(cs.length, colCount));
+            int totalWidth = cm.getTotalColumnWidth();
+            int widthAcc   = 0;
+
+            for(int c = 0, j = Math.min(cs.length, colCount); c < j; c++) {
                 int cw = Math.max(1, (int)(totalWidth * cs[c]));
-                column.setPreferredWidth(cw);
-                widthAcc.value += cw;
-            });
-            forEachColumn(cs.length, (c, column) -> column.setPreferredWidth((totalWidth - widthAcc.value) / diff));
-            with(getTable(), table -> invokeLater(table::revalidate));
-        }));
+                cm.getColumn(c).setPreferredWidth(cw);
+                widthAcc += cw;
+            }
+
+            if(cs.length < colCount) for(int c = cs.length; c < colCount; c++) {
+                cm.getColumn(c).setPreferredWidth((totalWidth - widthAcc) / diff);
+            }
+
+            invokeLater(() -> with(getTable(), JComponent::revalidate));
+        }
     }
 
     static final class DummyRowModel<T> extends AbstractPGJTableRowModel<T> {

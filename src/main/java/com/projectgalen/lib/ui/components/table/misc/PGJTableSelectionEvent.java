@@ -22,33 +22,32 @@ package com.projectgalen.lib.ui.components.table.misc;
 // IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 // ===========================================================================
 
-import com.projectgalen.lib.ui.components.table.PGJTable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EventObject;
 import java.util.List;
 
 public class PGJTableSelectionEvent extends EventObject {
-    private final int[]   selectedIndexes;
+    private final int[] selectedRows;
+    private final int[] selectedColumns;
     private final List<?> selectedItems;
 
-    public PGJTableSelectionEvent(@NotNull Object source, @NotNull PGJTable<?> table) {
+    public PGJTableSelectionEvent(@NotNull Object source, int @NotNull [] selectedRows, int @NotNull [] selectedColumns, @NotNull List<?> selectedItems) {
         super(source);
-        selectedIndexes = table.getSelectedRows();
-        selectedItems   = table.getSelectedItems();
-    }
-
-    public PGJTableSelectionEvent(@NotNull Object source, int[] selectedIndexes, @NotNull List<?> selectedItems) {
-        super(source);
-        this.selectedIndexes = selectedIndexes;
+        this.selectedRows    = selectedRows;
+        this.selectedColumns = selectedColumns;
         this.selectedItems   = selectedItems;
     }
 
-    public int[] getSelectedIndexes() {
-        return selectedIndexes;
+    public int[] getSelectedColumns() {
+        return selectedColumns;
     }
 
     public List<?> getSelectedItems() {
         return selectedItems;
+    }
+
+    public int[] getSelectedRows() {
+        return selectedRows;
     }
 }
