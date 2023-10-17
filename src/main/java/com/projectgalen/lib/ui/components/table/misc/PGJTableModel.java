@@ -23,7 +23,7 @@ package com.projectgalen.lib.ui.components.table.misc;
 // ===========================================================================
 
 import com.projectgalen.lib.ui.events.TableCellModelEvent;
-import com.projectgalen.lib.ui.interfaces.PGDataModel;
+import com.projectgalen.lib.ui.interfaces.PGDataSupplier;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -35,18 +35,18 @@ import java.awt.*;
 @SuppressWarnings("unused")
 public class PGJTableModel<T> extends AbstractTableModel {
     protected PGJTableRowModel<T> rowModel;
-    protected PGDataModel<T>      dataModel;
+    protected PGDataSupplier<T>   dataSupplier;
 
-    public PGJTableModel(PGJTableRowModel<T> rowModel, PGDataModel<T> dataModel) {
+    public PGJTableModel(PGJTableRowModel<T> rowModel, PGDataSupplier<T> dataSupplier) {
         super();
-        this.dataModel = dataModel;
-        this.rowModel  = rowModel;
+        this.dataSupplier = dataSupplier;
+        this.rowModel     = rowModel;
         this.rowModel.setModelProvider(() -> this);
         this.rowModel.addTableCellModelListener(this::onTableCellModelEvent);
     }
 
     public PGJTableModel(PGJTableRowModel<T> rowModel) {
-        this(rowModel, new PGListDataModel<>());
+        this(rowModel, new PGListDataSupplier<>());
     }
 
     public @Override @Nullable Class<?> getColumnClass(int columnIndex) {
@@ -61,12 +61,12 @@ public class PGJTableModel<T> extends AbstractTableModel {
         return rowModel.getColumnName(columnIndex);
     }
 
-    public PGDataModel<T> getDataModel() {
-        return dataModel;
+    public PGDataSupplier<T> getDataSupplier() {
+        return dataSupplier;
     }
 
     public @Override int getRowCount() {
-        return dataModel.size();
+        return dataSupplier.size();
     }
 
     public PGJTableRowModel<T> getRowModel() {
@@ -74,11 +74,11 @@ public class PGJTableModel<T> extends AbstractTableModel {
     }
 
     public @Contract(pure = true) @Override @Nullable Object getValueAt(int rowIndex, int columnIndex) {
-        return (isRowIndexValid(rowIndex) ? rowModel.getColumnValue(dataModel.get(rowIndex), columnIndex) : null);
+        return (isRowIndexValid(rowIndex) ? rowModel.getColumnValue(dataSupplier.get(rowIndex), columnIndex) : null);
     }
 
     public @Override boolean isCellEditable(int rowIndex, int columnIndex) {
-        return (isRowIndexValid(rowIndex) && rowModel.isColumnEditable(dataModel.get(rowIndex), columnIndex));
+        return (isRowIndexValid(rowIndex) && rowModel.isColumnEditable(dataSupplier.get(rowIndex), columnIndex));
     }
 
     public boolean isRowDeletable(int rowIndex) {
@@ -90,20 +90,20 @@ public class PGJTableModel<T> extends AbstractTableModel {
     }
 
     public boolean isRowIndexValid(int rowIndex) {
-        return ((rowIndex >= 0) && (rowIndex < dataModel.size()));
+        return ((rowIndex >= 0) && (rowIndex < dataSupplier.size()));
     }
 
     public boolean isRowSelectable(int rowIndex) {
         return true;
     }
 
-    public void setDataModel(@NotNull PGDataModel<T> dataModel) {
-        this.dataModel = dataModel;
+    public void setDataSupplier(@NotNull PGDataSupplier<T> dataSupplier) {
+        this.dataSupplier = dataSupplier;
         fireTableDataChanged();
     }
 
     public @NotNull Component setRowAttributes(@NotNull Component renderer, @NotNull JTable table, int rowIndex, int columnIndex, boolean isSelected) {
-        rowModel.setColumnAttributes(renderer, table, dataModel.get(rowIndex), columnIndex, isSelected);
+        rowModel.setColumnAttributes(renderer, table, dataSupplier.get(rowIndex), columnIndex, isSelected);
         return renderer;
     }
 
@@ -114,7 +114,7 @@ public class PGJTableModel<T> extends AbstractTableModel {
 
     public @Override void setValueAt(Object aValue, int rowIndex, int columnIndex) {
         if(isRowIndexValid(rowIndex)) {
-            rowModel.setColumnValue(dataModel.get(rowIndex), rowIndex, columnIndex, aValue);
+            rowModel.setColumnValue(dataSupplier.get(rowIndex), rowIndex, columnIndex, aValue);
             fireTableDataChanged();
         }
     }

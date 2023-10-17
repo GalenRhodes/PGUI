@@ -1,8 +1,8 @@
-package com.projectgalen.lib.ui.components.table.misc;
+package com.projectgalen.lib.ui.interfaces;
 
 // ===========================================================================
 //     PROJECT: PGUI
-//    FILENAME: PGListDataModel.java
+//    FILENAME: PGDataSupplier.java
 //         IDE: IntelliJ IDEA
 //      AUTHOR: Galen Rhodes
 //        DATE: October 13, 2023
@@ -22,39 +22,19 @@ package com.projectgalen.lib.ui.components.table.misc;
 // IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 // ===========================================================================
 
-import com.projectgalen.lib.ui.interfaces.PGDataModel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-public class PGListDataModel<T> implements PGDataModel<T> {
-    private final List<T> list;
+public interface PGDataSupplier<T> {
 
-    public PGListDataModel() {
-        this.list = Collections.emptyList();
-    }
+    void forEach(@NotNull Consumer<? super T> consumer);
 
-    public PGListDataModel(@NotNull List<T> list) {
-        this.list = list;
-    }
+    T get(@Range(from = 0, to = Integer.MAX_VALUE) int index);
 
-    public @Override void forEach(@NotNull Consumer<? super T> consumer) {
-        list.forEach(consumer);
-    }
+    int size();
 
-    public @Override T get(@Range(from = 0, to = Integer.MAX_VALUE) int index) {
-        return list.get(index);
-    }
-
-    public @Override int size() {
-        return list.size();
-    }
-
-    public @Override @NotNull Stream<T> stream() {
-        return list.stream();
-    }
+    @NotNull Stream<T> stream();
 }

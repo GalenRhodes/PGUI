@@ -33,6 +33,8 @@ import javax.swing.table.TableModel;
 import java.awt.*;
 import java.math.BigDecimal;
 
+import static com.projectgalen.lib.ui.M.msgs;
+
 @SuppressWarnings("unchecked")
 public class PGJTableImpl<T> extends JTable {
 
@@ -55,9 +57,8 @@ public class PGJTableImpl<T> extends JTable {
         return c;
     }
 
-    public @Override Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
-        PGJTableModel<T> model = getTableModel();
-        return ((model != null) ? prepareRenderer(model, super.prepareRenderer(renderer, row, column), row, column, isCellSelected(row, column)) : super.prepareRenderer(renderer, row, column));
+    public @Override @Nullable PGJTableModel<T> getModel() {
+        return (PGJTableModel<T>)super.getModel();
     }
 
     public @NotNull Component prepareRenderer(@NotNull PGJTableModel<T> model, @NotNull Component renderer, int row, int column, boolean isSelected) {
@@ -68,8 +69,17 @@ public class PGJTableImpl<T> extends JTable {
         return model.setRowAttributes(renderer, this, row, column, isSelected);
     }
 
-    private @Nullable PGJTableModel<T> getTableModel() {
-        TableModel model = super.getModel();
-        return ((model instanceof PGJTableModel<?>) ? ((PGJTableModel<T>)model) : null);
+    public @Override Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+        PGJTableModel<T> model = getModel();
+        return ((model != null) ? prepareRenderer(model, super.prepareRenderer(renderer, row, column), row, column, isCellSelected(row, column)) : super.prepareRenderer(renderer, row, column));
+    }
+
+    public @Override void setModel(@NotNull TableModel dataModel) {
+        if(dataModel instanceof PGJTableModel<?>) super.setModel(dataModel);
+        else throw new IllegalArgumentException(msgs.getString("msg.err.pgjtableimpl.invalid_instance_of_model"));
+    }
+
+    public void setModel(@NotNull PGJTableModel<T> model) {
+        super.setModel(model);
     }
 }
