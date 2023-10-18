@@ -583,10 +583,16 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
     }
 
     public void setRowModel(@NotNull PGJTableRowModel<T> rowModel) {
-        if(!(rowModel instanceof PGJTable.DummyRowModel<T>)) setData(Collections.emptyList());
-        ofNullable(getModel()).ifPresent(model -> model.setRowModel(rowModel));
-        resizeTable();
-        updateColumnPreferredWidths();
+        ofNullable(getModel()).ifPresent(model -> {
+            if(!isDummyRowModel(rowModel) && isDummyRowModel(model.getRowModel())) setData(Collections.emptyList());
+            model.setRowModel(rowModel);
+            resizeTable();
+            updateColumnPreferredWidths();
+        });
+    }
+
+    private boolean isDummyRowModel(PGJTableRowModel<T> rowModel) {
+        return (rowModel instanceof PGJTable.DummyRowModel<T>);
     }
 
     public void setRowSelectionAllowed(boolean rowSelectionAllowed) {
