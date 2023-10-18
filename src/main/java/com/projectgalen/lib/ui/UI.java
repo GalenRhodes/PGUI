@@ -39,14 +39,18 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static com.intellij.uiDesigner.core.GridConstraints.*;
 import static com.projectgalen.lib.utils.errors.Errors.makeRuntimeException;
 import static com.projectgalen.lib.utils.errors.Errors.propagate;
 import static java.awt.event.KeyEvent.VK_UNDEFINED;
 
 @SuppressWarnings("unused")
 public final class UI {
-    public static final int CANGROW_WANTGROW  = (GridConstraints.SIZEPOLICY_CAN_GROW | GridConstraints.SIZEPOLICY_WANT_GROW);
-    public static final int CANGROW_CANSHRINK = (GridConstraints.SIZEPOLICY_CAN_GROW | GridConstraints.SIZEPOLICY_CAN_SHRINK);
+    public static final int      SIZEPOLICY_BOTH     = (SIZEPOLICY_CAN_SHRINK | SIZEPOLICY_CAN_GROW);
+    public static final int      SIZEPOLICY_GROW_ALL = (SIZEPOLICY_CAN_GROW | SIZEPOLICY_WANT_GROW);
+    public static final int      SIZEPOLICY_ALL      = (SIZEPOLICY_CAN_SHRINK | SIZEPOLICY_GROW_ALL);
+    public static final int[]    EMPTY_INT_ARRAY     = new int[0];
+    public static final double[] EMPTY_DOUBLE_ARRAY  = new double[0];
 
     private UI() { }
 
@@ -81,7 +85,7 @@ public final class UI {
 
     @Contract(value = "_, _, _, _, _, _ -> new", pure = true)
     public static @NotNull GridConstraints getGridConstraints(int row, int column, int rowSpan, int colSpan, int anchor, int fill) {
-        return new GridConstraints(row, column, rowSpan, colSpan, anchor, fill, CANGROW_CANSHRINK, CANGROW_CANSHRINK, null, null, null, 0);
+        return new GridConstraints(row, column, rowSpan, colSpan, anchor, fill, SIZEPOLICY_BOTH, SIZEPOLICY_BOTH, null, null, null, 0);
     }
 
     @Contract(value = "_, _ -> new", pure = true)
@@ -95,7 +99,7 @@ public final class UI {
                                    colSpan,
                                    GridConstraints.ANCHOR_CENTER,
                                    GridConstraints.FILL_HORIZONTAL,
-                                   CANGROW_WANTGROW,
+                                   SIZEPOLICY_GROW_ALL,
                                    GridConstraints.SIZEPOLICY_FIXED,
                                    null,
                                    null,
@@ -143,7 +147,7 @@ public final class UI {
                                    GridConstraints.ANCHOR_CENTER,
                                    GridConstraints.FILL_VERTICAL,
                                    GridConstraints.SIZEPOLICY_FIXED,
-                                   CANGROW_WANTGROW,
+                                   SIZEPOLICY_GROW_ALL,
                                    null,
                                    null,
                                    null,

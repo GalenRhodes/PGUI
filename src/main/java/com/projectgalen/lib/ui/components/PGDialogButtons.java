@@ -24,6 +24,7 @@ package com.projectgalen.lib.ui.components;
 
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
+import com.projectgalen.lib.ui.UI;
 import com.projectgalen.lib.ui.base.NonGUIEditorCustomComponent;
 import com.projectgalen.lib.ui.interfaces.DialogButtonsInterface;
 import org.jetbrains.annotations.NotNull;
@@ -45,8 +46,8 @@ public class PGDialogButtons extends JPanel implements NonGUIEditorCustomCompone
     public PGDialogButtons() {
         super(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1), true);
         add(new Spacer(), createConstraint(0, 0, ANCHOR_CENTER, FILL_HORIZONTAL, SIZEPOLICY_WANT_GROW, SIZEPOLICY_CAN_SHRINK));
-        add(buttonOK = createButton("accept.png", "button.ok"), createConstraint(0, 1, ANCHOR_CENTER, FILL_HORIZONTAL, SIZE_POLICY_BOTH, SIZEPOLICY_FIXED));
-        add(buttonCancel = createButton("cancel.png", "button.cancel"), createConstraint(0, 2, ANCHOR_CENTER, FILL_HORIZONTAL, SIZE_POLICY_BOTH, SIZEPOLICY_FIXED));
+        add(buttonOK = createButton("accept.png", "button.ok"), createConstraint(0, 1, ANCHOR_CENTER, FILL_HORIZONTAL, UI.SIZEPOLICY_BOTH, SIZEPOLICY_FIXED));
+        add(buttonCancel = createButton("cancel.png", "button.cancel"), createConstraint(0, 2, ANCHOR_CENTER, FILL_HORIZONTAL, UI.SIZEPOLICY_BOTH, SIZEPOLICY_FIXED));
     }
 
     public @Override void addCancelButtonListener(@NotNull ActionListener e) {
