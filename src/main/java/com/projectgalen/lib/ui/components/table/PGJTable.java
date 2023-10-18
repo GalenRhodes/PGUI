@@ -13,21 +13,23 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.event.AncestorListener;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.beans.PropertyChangeListener;
+import java.beans.VetoableChangeListener;
+import java.math.BigDecimal;
 import java.util.Collections;
-import java.util.EventObject;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static com.projectgalen.lib.ui.M.msgs;
 import static com.projectgalen.lib.ui.components.table.VSizePolicy.None;
 import static java.util.Objects.requireNonNullElse;
 import static java.util.Objects.requireNonNullElseGet;
@@ -37,23 +39,24 @@ import static javax.swing.SwingUtilities.invokeLater;
 @SuppressWarnings("unused")
 public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomComponent {
 
-    protected static final int      DEFAULT_ROW_HEIGHT               = 20;
-    protected static final Class<?> DEFAULT_COLUMN_CLASS             = String.class;
-    protected static final String   UIKEY_TABLE_FONT                 = "Table.font";
-    protected static final String   UIKEY_TABLE_SELECTION_BACKGROUND = "Table[Enabled+Selected].textBackground";
-    protected static final String   UIKEY_TABLE_SELECTION_FOREGROUND = "Table[Enabled+Selected].textForeground";
+    private static final int      DEFAULT_ROW_HEIGHT               = 20;
+    private static final Class<?> DEFAULT_COLUMN_CLASS             = String.class;
+    private static final String   UIKEY_TABLE_FONT                 = "Table.font";
+    private static final String   UIKEY_TABLE_SELECTION_BACKGROUND = "Table[Enabled+Selected].textBackground";
+    private static final String   UIKEY_TABLE_SELECTION_FOREGROUND = "Table[Enabled+Selected].textForeground";
 
-    protected final EventListeners   listeners             = new EventListeners();
-    protected final PGJTableImpl<T>  table;
-    protected       PGJTableModel<T> tableModel;
-    protected       boolean          hideHeader;
-    protected       int              aRowHeight;
-    protected       int              aHeaderRowHeight;
-    protected       int              maximumVisibleRows    = Integer.MAX_VALUE;
-    protected       double[]         columnSizePercentages = UI.EMPTY_DOUBLE_ARRAY;
-    protected       VSizePolicy      verticalSizePolicy    = None;
-    protected       Font             cellFont;
-    protected       Font             headerFont;
+    private final PGJTableImpl<T>  table;
+    private final EventListeners   listeners             = new EventListeners();
+    private       PGJTableModel<T> tableModel;
+    private       boolean          hideHeader;
+    private       int              aRowHeight;
+    private       int              aHeaderRowHeight;
+    private       int              maximumVisibleRows    = Integer.MAX_VALUE;
+    private       double[]         columnSizePercentages = null;
+    private       VSizePolicy      verticalSizePolicy    = None;
+    private       Font             cellFont;
+    private       Font             headerFont;
+    private final JTableProxy      tableProxy            = new JTableProxy();
 
     public PGJTable() {
         this(new PGJTableModel<>(new DummyRowModel<>(), new DummyDataSupplier<>()), null, null, 0, null, null, false);
@@ -129,7 +132,7 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
 
         this.maximumVisibleRows    = ((maximumVisibleRows > 0) ? maximumVisibleRows : this.maximumVisibleRows);
         this.verticalSizePolicy    = requireNonNullElse(verticalSizePolicy, this.verticalSizePolicy);
-        this.columnSizePercentages = requireNonNullElse(columnSizePercentages, this.columnSizePercentages);
+        this.columnSizePercentages = ofNullable(columnSizePercentages).orElse(this.columnSizePercentages);
         this.cellFont              = requireNonNullElseGet(font, this::getCurrentFont);
         this.hideHeader            = hideHeader;
 
@@ -145,64 +148,12 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
         });
     }
 
-    public @Override void addAncestorListener(AncestorListener listener) {
-        ofNullable(getTable()).ifPresent(table -> table.addAncestorListener(listener));
-    }
-
-    public @Override void addComponentListener(ComponentListener l) {
-        ofNullable(getTable()).ifPresent(table -> table.addComponentListener(l));
-    }
-
-    public @Override void addContainerListener(ContainerListener l) {
-        ofNullable(getTable()).ifPresent(table -> table.addContainerListener(l));
-    }
-
-    public @Override void addFocusListener(FocusListener l) {
-        ofNullable(getTable()).ifPresent(table -> table.addFocusListener(l));
-    }
-
-    public @Override void addHierarchyBoundsListener(HierarchyBoundsListener l) {
-        ofNullable(getTable()).ifPresent(table -> table.addHierarchyBoundsListener(l));
-    }
-
-    public @Override void addHierarchyListener(HierarchyListener l) {
-        ofNullable(getTable()).ifPresent(table -> table.addHierarchyListener(l));
-    }
-
-    public @Override void addInputMethodListener(InputMethodListener l) {
-        ofNullable(getTable()).ifPresent(table -> table.addInputMethodListener(l));
-    }
-
-    public @Override void addKeyListener(KeyListener l) {
-        ofNullable(getTable()).ifPresent(table -> table.addKeyListener(l));
-    }
-
-    public @Override void addMouseListener(MouseListener l) {
-        ofNullable(getTable()).ifPresent(table -> table.addMouseListener(l));
-    }
-
-    public @Override void addMouseMotionListener(MouseMotionListener l) {
-        ofNullable(getTable()).ifPresent(table -> table.addMouseMotionListener(l));
-    }
-
-    public @Override void addMouseWheelListener(MouseWheelListener l) {
-        ofNullable(getTable()).ifPresent(table -> table.addMouseWheelListener(l));
-    }
-
-    public @Override void addPropertyChangeListener(PropertyChangeListener listener) {
-        ofNullable(getTable()).ifPresent(table -> table.addPropertyChangeListener(listener));
-    }
-
-    public @Override void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
-        ofNullable(getTable()).ifPresent(table -> table.addPropertyChangeListener(propertyName, listener));
-    }
-
     public void addRowSelectionInterval(int index0, int index1) {
         ofNullable(getTable()).ifPresent(table -> table.addRowSelectionInterval(index0, index1));
     }
 
     public void addTableSelectionListener(@NotNull PGJTableSelectionListener listener) {
-        if(listeners != null) listeners.add(PGJTableSelectionListener.class, listener);
+        ofNullable(listeners).ifPresent(l -> l.add(PGJTableSelectionListener.class, listener));
     }
 
     public void changeSelection(int rowIndex, int columnIndex, boolean toggle, boolean extend) {
@@ -211,26 +162,6 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
 
     public void clearSelection() {
         ofNullable(getTable()).ifPresent(JTable::clearSelection);
-    }
-
-    public int columnAtPoint(@NotNull Point point) {
-        return ofNullable(getTable()).map(table -> table.columnAtPoint(point)).orElse(-1);
-    }
-
-    public boolean editCellAt(int row, int column) {
-        return ofNullable(getTable()).map(table -> table.editCellAt(row, column)).orElse(false);
-    }
-
-    public boolean editCellAt(int row, int column, EventObject e) {
-        return ofNullable(getTable()).map(table -> table.editCellAt(row, column, e)).orElse(false);
-    }
-
-    public void editingCanceled(ChangeEvent e) {
-        ofNullable(getTable()).ifPresent(table -> table.editingCanceled(e));
-    }
-
-    public void editingStopped(ChangeEvent e) {
-        ofNullable(getTable()).ifPresent(table -> table.editingStopped(e));
     }
 
     public void fireTableCellUpdated(int rowIndex, int columnIndex) {
@@ -291,8 +222,7 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
     }
 
     public TableColumn getColumn(int columnIndex) {
-        TableColumnModel m = getColumnModel();
-        return ((m != null) ? m.getColumn(columnIndex) : null);
+        return ofNullable(getColumnModel()).map(m -> m.getColumn(columnIndex)).orElse(null);
     }
 
     public TableColumn getColumn(@NotNull Object identifier) {
@@ -305,8 +235,7 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
     }
 
     public int getColumnCount() {
-        TableColumnModel o = getColumnModel();
-        return ((o != null) ? o.getColumnCount() : 0);
+        return ofNullable(getColumnModel()).map(TableColumnModel::getColumnCount).orElse(0);
     }
 
     public TableColumnModel getColumnModel() {
@@ -322,12 +251,11 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
     }
 
     public double[] getColumnSizePercentages() {
-        return requireNonNullElse(columnSizePercentages, UI.EMPTY_DOUBLE_ARRAY);
+        return requireNonNullElseGet(columnSizePercentages, () -> ofNullable(getRowModel()).map(PGJTableRowModel::getColumnSizePercentages).orElse(UI.EMPTY_DOUBLE_ARRAY));
     }
 
     public PGDataSupplier<T> getDataSupplier() {
-        PGJTableModel<T> o = getModel();
-        return ((o != null) ? o.getDataSupplier() : null);
+        return ofNullable(getModel()).map(PGJTableModel::getDataSupplier).orElse(null);
     }
 
     public TableCellEditor getDefaultEditor(Class<?> columnClass) {
@@ -391,8 +319,7 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
     }
 
     public PGJTableRowModel<T> getRowModel() {
-        PGJTableModel<T> o = getModel();
-        return ((o != null) ? o.getRowModel() : null);
+        return ofNullable(getModel()).map(PGJTableModel::getRowModel).orElse(null);
     }
 
     public boolean getRowSelectionAllowed() {
@@ -432,8 +359,7 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
     }
 
     public List<T> getSelectedItems() {
-        PGDataSupplier<T> dataSupplier = getDataSupplier();
-        return ((dataSupplier != null) ? IntStream.of(getSelectedRows()).mapToObj(dataSupplier::get).toList() : Collections.emptyList());
+        return ofNullable(getDataSupplier()).map(dataSupplier -> IntStream.of(getSelectedRows()).mapToObj(dataSupplier::get).toList()).orElseGet(Collections::emptyList);
     }
 
     public int getSelectedRow() {
@@ -457,8 +383,7 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
     }
 
     public SelectionMode getSelectionMode() {
-        ListSelectionModel selectionModel = getSelectionModel();
-        return ((selectionModel != null) ? SelectionMode.valueOf(selectionModel.getSelectionMode()) : SelectionMode.Single);
+        return ofNullable(getSelectionModel()).map(m -> SelectionMode.valueOf(m.getSelectionMode())).orElse(SelectionMode.Single);
     }
 
     public ListSelectionModel getSelectionModel() {
@@ -473,24 +398,12 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
         return ofNullable(getTable()).map(JTable::getShowVerticalLines).orElse(false);
     }
 
-    public boolean getSurrendersFocusOnKeystroke() {
-        return ofNullable(getTable()).map(JTable::getSurrendersFocusOnKeystroke).orElse(false);
+    public @NotNull JTableProxy getTableComponent() {
+        return ofNullable(tableProxy).orElse(new JTableProxy());
     }
 
     public JTableHeader getTableHeader() {
         return ofNullable(getTable()).map(JTable::getTableHeader).orElse(null);
-    }
-
-    public @Override Point getToolTipLocation(MouseEvent event) {
-        return super.getToolTipLocation(event);
-    }
-
-    public @Override String getToolTipText() {
-        return super.getToolTipText();
-    }
-
-    public @Override String getToolTipText(@NotNull MouseEvent event) {
-        return ofNullable(getTable()).map(table -> table.getToolTipText(event)).orElse(null);
     }
 
     public boolean getUpdateSelectionOnSort() {
@@ -533,60 +446,8 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
         ofNullable(getTable()).ifPresent(table -> table.moveColumn(column, targetColumn));
     }
 
-    public @Override void removeAncestorListener(AncestorListener listener) {
-        ofNullable(getTable()).ifPresent(table -> table.removeAncestorListener(listener));
-    }
-
-    public @Override void removeComponentListener(ComponentListener l) {
-        ofNullable(getTable()).ifPresent(table -> table.removeComponentListener(l));
-    }
-
-    public @Override void removeContainerListener(ContainerListener l) {
-        ofNullable(getTable()).ifPresent(table -> table.removeContainerListener(l));
-    }
-
     public void removeEditor() {
         ofNullable(getTable()).ifPresent(JTable::removeEditor);
-    }
-
-    public @Override void removeFocusListener(FocusListener l) {
-        ofNullable(getTable()).ifPresent(table -> table.removeFocusListener(l));
-    }
-
-    public @Override void removeHierarchyBoundsListener(HierarchyBoundsListener l) {
-        ofNullable(getTable()).ifPresent(table -> table.removeHierarchyBoundsListener(l));
-    }
-
-    public @Override void removeHierarchyListener(HierarchyListener l) {
-        ofNullable(getTable()).ifPresent(table -> table.removeHierarchyListener(l));
-    }
-
-    public @Override void removeInputMethodListener(InputMethodListener l) {
-        ofNullable(getTable()).ifPresent(table -> table.removeInputMethodListener(l));
-    }
-
-    public @Override void removeKeyListener(KeyListener l) {
-        ofNullable(getTable()).ifPresent(table -> table.removeKeyListener(l));
-    }
-
-    public @Override void removeMouseListener(MouseListener l) {
-        ofNullable(getTable()).ifPresent(table -> table.removeMouseListener(l));
-    }
-
-    public @Override void removeMouseMotionListener(MouseMotionListener l) {
-        ofNullable(getTable()).ifPresent(table -> table.removeMouseMotionListener(l));
-    }
-
-    public @Override void removeMouseWheelListener(MouseWheelListener l) {
-        ofNullable(getTable()).ifPresent(table -> table.removeMouseWheelListener(l));
-    }
-
-    public @Override void removePropertyChangeListener(PropertyChangeListener listener) {
-        ofNullable(getTable()).ifPresent(table -> table.removePropertyChangeListener(listener));
-    }
-
-    public @Override void removePropertyChangeListener(String propertyName, PropertyChangeListener listener) {
-        ofNullable(getTable()).ifPresent(table -> table.removePropertyChangeListener(propertyName, listener));
     }
 
     public void removeRowSelectionInterval(int index0, int index1) {
@@ -594,7 +455,7 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
     }
 
     public void removeTableSelectionListener(@NotNull PGJTableSelectionListener listener) {
-        if(listeners != null) listeners.remove(PGJTableSelectionListener.class, listener);
+        ofNullable(listeners).ifPresent(l -> l.remove(PGJTableSelectionListener.class, listener));
     }
 
     public int rowAtPoint(@NotNull Point point) {
@@ -696,9 +557,8 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
     }
 
     public void setModel(@NotNull PGJTableModel<T> model) {
-        PGJTableImpl<T> table = getTable();
         this.tableModel = model;
-        if(table != null) table.setModel(model);
+        ofNullable(getTable()).ifPresent(t -> t.setModel(model));
     }
 
     public void setPreferredScrollableViewportSize(Dimension size) {
@@ -725,6 +585,7 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
     public void setRowModel(@NotNull PGJTableRowModel<T> rowModel) {
         ofNullable(getModel()).ifPresent(model -> model.setRowModel(rowModel));
         resizeTable();
+        updateColumnPreferredWidths();
     }
 
     public void setRowSelectionAllowed(boolean rowSelectionAllowed) {
@@ -767,10 +628,6 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
         ofNullable(getTable()).ifPresent(table -> table.setShowVerticalLines(showVerticalLines));
     }
 
-    public @Override void setToolTipText(String text) {
-        ofNullable(getTable()).ifPresent(table -> table.setToolTipText(text));
-    }
-
     public void setUpdateSelectionOnSort(boolean update) {
         ofNullable(getTable()).ifPresent(table -> table.setUpdateSelectionOnSort(update));
     }
@@ -793,8 +650,7 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
     }
 
     private int getFontHeight(@NotNull Font font) {
-        FontMetrics m = getFontMetrics(font);
-        return ((m != null) ? (m.getMaxAscent() + m.getMaxDescent()) : 0);
+        return ofNullable(getFontMetrics(font)).map(m -> (m.getMaxAscent() + m.getMaxDescent())).orElse(0);
     }
 
     private @Nullable PGJTableImpl<T> getTable() {
@@ -861,6 +717,177 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
         return requireNonNullElseGet(UIManager.getFont(UIKEY_TABLE_FONT), () -> new Font(Font.SANS_SERIF, Font.PLAIN, 12));
     }
 
+    public final class JTableProxy {
+
+        public void addAncestorListener(AncestorListener listener) {
+            ofNullable(getTable()).ifPresent(t -> t.addAncestorListener(listener));
+        }
+
+        public void addComponentListener(ComponentListener l) {
+            ofNullable(getTable()).ifPresent(t -> t.addComponentListener(l));
+        }
+
+        public void addContainerListener(ContainerListener l) {
+            ofNullable(getTable()).ifPresent(t -> t.addContainerListener(l));
+        }
+
+        public void addFocusListener(FocusListener l) {
+            ofNullable(getTable()).ifPresent(t -> t.addFocusListener(l));
+        }
+
+        public void addHierarchyBoundsListener(HierarchyBoundsListener l) {
+            ofNullable(getTable()).ifPresent(t -> t.addHierarchyBoundsListener(l));
+        }
+
+        public void addHierarchyListener(HierarchyListener l) {
+            ofNullable(getTable()).ifPresent(t -> t.addHierarchyListener(l));
+        }
+
+        public void addInputMethodListener(InputMethodListener l) {
+            ofNullable(getTable()).ifPresent(t -> t.addInputMethodListener(l));
+        }
+
+        public void addKeyListener(KeyListener l) {
+            ofNullable(getTable()).ifPresent(t -> t.addKeyListener(l));
+        }
+
+        public void addMouseListener(MouseListener l) {
+            ofNullable(getTable()).ifPresent(t -> t.addMouseListener(l));
+        }
+
+        public void addMouseMotionListener(MouseMotionListener l) {
+            ofNullable(getTable()).ifPresent(t -> t.addMouseMotionListener(l));
+        }
+
+        public void addMouseWheelListener(MouseWheelListener l) {
+            ofNullable(getTable()).ifPresent(t -> t.addMouseWheelListener(l));
+        }
+
+        public void addPropertyChangeListener(PropertyChangeListener listener) {
+            ofNullable(getTable()).ifPresent(t -> t.addPropertyChangeListener(listener));
+        }
+
+        public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
+            ofNullable(getTable()).ifPresent(t -> t.addPropertyChangeListener(propertyName, listener));
+        }
+
+        public void addVetoableChangeListener(VetoableChangeListener listener) {
+            ofNullable(getTable()).ifPresent(t -> t.addVetoableChangeListener(listener));
+        }
+
+        public boolean contains(Point p) {
+            return ofNullable(getTable()).map(t -> t.contains(p)).orElse(false);
+        }
+
+        public void enableInputMethods(boolean enable) {
+            ofNullable(getTable()).ifPresent(t -> t.enableInputMethods(enable));
+        }
+
+        public ActionListener getActionForKeyStroke(KeyStroke aKeyStroke) {
+            return ofNullable(getTable()).map(t -> t.getActionForKeyStroke(aKeyStroke)).orElse(null);
+        }
+
+        public int getConditionForKeyStroke(KeyStroke aKeyStroke) {
+            return ofNullable(getTable()).map(t -> t.getConditionForKeyStroke(aKeyStroke)).orElse(0);
+        }
+
+        public Point getMousePosition(boolean allowChildren) throws HeadlessException {
+            return ofNullable(getTable()).map(t -> t.getMousePosition(allowChildren)).orElse(null);
+        }
+
+        public Point getMousePosition() throws HeadlessException {
+            return ofNullable(getTable()).map(Component::getMousePosition).orElse(null);
+        }
+
+        public Point getPopupLocation(MouseEvent event) {
+            return ofNullable(getTable()).map(t -> t.getPopupLocation(event)).orElse(null);
+        }
+
+        public KeyStroke[] getRegisteredKeyStrokes() {
+            return ofNullable(getTable()).map(JComponent::getRegisteredKeyStrokes).orElseGet(() -> new KeyStroke[0]);
+        }
+
+        public boolean getSurrendersFocusOnKeystroke() {
+            return ofNullable(getTable()).map(JTable::getSurrendersFocusOnKeystroke).orElse(false);
+        }
+
+        public Point getToolTipLocation(MouseEvent event) {
+            return ofNullable(getTable()).map(t -> t.getToolTipLocation(event)).orElseGet(Point::new);
+        }
+
+        public String getToolTipText() {
+            return ofNullable(getTable()).map(JComponent::getToolTipText).orElse(null);
+        }
+
+        public String getToolTipText(@NotNull MouseEvent event) {
+            return ofNullable(getTable()).map(table -> table.getToolTipText(event)).orElse(null);
+        }
+
+        public void removeAncestorListener(AncestorListener listener) {
+            ofNullable(getTable()).ifPresent(t -> t.removeAncestorListener(listener));
+        }
+
+        public void removeComponentListener(ComponentListener l) {
+            ofNullable(getTable()).ifPresent(t -> t.removeComponentListener(l));
+        }
+
+        public void removeContainerListener(ContainerListener l) {
+            ofNullable(getTable()).ifPresent(t -> t.removeContainerListener(l));
+        }
+
+        public void removeFocusListener(FocusListener l) {
+            ofNullable(getTable()).ifPresent(t -> t.removeFocusListener(l));
+        }
+
+        public void removeHierarchyBoundsListener(HierarchyBoundsListener l) {
+            ofNullable(getTable()).ifPresent(t -> t.removeHierarchyBoundsListener(l));
+        }
+
+        public void removeHierarchyListener(HierarchyListener l) {
+            ofNullable(getTable()).ifPresent(t -> t.removeHierarchyListener(l));
+        }
+
+        public void removeInputMethodListener(InputMethodListener l) {
+            ofNullable(getTable()).ifPresent(t -> t.removeInputMethodListener(l));
+        }
+
+        public void removeKeyListener(KeyListener l) {
+            ofNullable(getTable()).ifPresent(t -> t.removeKeyListener(l));
+        }
+
+        public void removeMouseListener(MouseListener l) {
+            ofNullable(getTable()).ifPresent(t -> t.removeMouseListener(l));
+        }
+
+        public void removeMouseMotionListener(MouseMotionListener l) {
+            ofNullable(getTable()).ifPresent(t -> t.removeMouseMotionListener(l));
+        }
+
+        public void removeMouseWheelListener(MouseWheelListener l) {
+            ofNullable(getTable()).ifPresent(t -> t.removeMouseWheelListener(l));
+        }
+
+        public void removePropertyChangeListener(PropertyChangeListener listener) {
+            ofNullable(getTable()).ifPresent(t -> t.removePropertyChangeListener(listener));
+        }
+
+        public void removePropertyChangeListener(String propertyName, PropertyChangeListener listener) {
+            ofNullable(getTable()).ifPresent(t -> t.removePropertyChangeListener(propertyName, listener));
+        }
+
+        public void removeVetoableChangeListener(VetoableChangeListener listener) {
+            ofNullable(getTable()).ifPresent(t -> t.removeVetoableChangeListener(listener));
+        }
+
+        public void resetKeyboardActions() {
+            ofNullable(getTable()).ifPresent(JComponent::resetKeyboardActions);
+        }
+
+        public void setToolTipText(String text) {
+            ofNullable(getTable()).ifPresent(table -> table.setToolTipText(text));
+        }
+    }
+
     static final class DummyRowModel<T> extends AbstractPGJTableRowModel<T> {
 
         public static final String[] columnNames = { "Alpha", "Beta" };
@@ -905,6 +932,55 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
                     return (List<T>)IntStream.range(0, 4).mapToObj(DummyData::new).toList();
                 }
             }
+        }
+    }
+
+    private static final class PGJTableImpl<T> extends JTable {
+
+        public static final Border EMPTY_BORDER = BorderFactory.createEmptyBorder(1, 1, 1, 1);
+
+        public PGJTableImpl(@Nullable PGJTableModel<T> tableModel) {
+            super(tableModel);
+            setDoubleBuffered(true);
+            setDefaultRenderer(BigDecimal.class, new CurrencyCellRenderer());
+            setDefaultEditor(BigDecimal.class, new CurrencyCellEditor());
+            setFillsViewportHeight(true);
+            setCellSelectionEnabled(true);
+            setColumnSelectionAllowed(true);
+            setRowSelectionAllowed(true);
+            getTableHeader().setReorderingAllowed(false);
+        }
+
+        @SuppressWarnings("unchecked") public @Override @Nullable PGJTableModel<T> getModel() {
+            return (PGJTableModel<T>)super.getModel();
+        }
+
+        public @Override Component prepareEditor(TableCellEditor editor, int row, int column) {
+            Component c = super.prepareEditor(editor, row, column);
+            c.setFont(getFont());
+            return c;
+        }
+
+        public @NotNull Component prepareRenderer(@NotNull PGJTableModel<T> model, @NotNull Component renderer, int row, int column, boolean isSelected) {
+            renderer.setBackground(isSelected ? getSelectionBackground() : getBackground());
+            renderer.setForeground(isSelected ? getSelectionForeground() : getForeground());
+            if(renderer instanceof JLabel l) l.setHorizontalAlignment(model.getRowModel().getColumnAlignment(column));
+            if(renderer instanceof JComponent c) c.setBorder(EMPTY_BORDER);
+            return model.setRowAttributes(renderer, this, row, column, isSelected);
+        }
+
+        public @Override Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+            PGJTableModel<T> model = getModel();
+            return ((model != null) ? prepareRenderer(model, super.prepareRenderer(renderer, row, column), row, column, isCellSelected(row, column)) : super.prepareRenderer(renderer, row, column));
+        }
+
+        public @Override void setModel(@NotNull TableModel dataModel) {
+            if(dataModel instanceof PGJTableModel<?>) super.setModel(dataModel);
+            else throw new IllegalArgumentException(msgs.getString("msg.err.pgjtableimpl.invalid_instance_of_model"));
+        }
+
+        public void setModel(@NotNull PGJTableModel<T> model) {
+            super.setModel(model);
         }
     }
 }

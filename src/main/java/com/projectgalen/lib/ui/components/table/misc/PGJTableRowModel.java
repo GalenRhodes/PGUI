@@ -22,6 +22,7 @@ package com.projectgalen.lib.ui.components.table.misc;
 // IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 // ===========================================================================
 
+import com.projectgalen.lib.ui.UI;
 import com.projectgalen.lib.ui.listeners.TableCellModelListener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,6 +42,8 @@ public interface PGJTableRowModel<T> {
     int getColumnCount();
 
     String getColumnName(int columnIndex);
+
+    default double[] getColumnSizePercentages() { return UI.EMPTY_DOUBLE_ARRAY; }
 
     @Nullable Object getColumnValue(@NotNull T obj, int columnIndex);
 
