@@ -583,6 +583,7 @@ public class PGJTable<T> extends JScrollPane implements NonGUIEditorCustomCompon
     }
 
     public void setRowModel(@NotNull PGJTableRowModel<T> rowModel) {
+        if(!(rowModel instanceof PGJTable.DummyRowModel<T>)) setData(Collections.emptyList());
         ofNullable(getModel()).ifPresent(model -> model.setRowModel(rowModel));
         resizeTable();
         updateColumnPreferredWidths();
