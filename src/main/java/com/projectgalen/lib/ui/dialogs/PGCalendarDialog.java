@@ -65,7 +65,7 @@ public class PGCalendarDialog extends JDialogBase {
         maxYear   = Math.max(startYear, endYear);
         date      = ofNullable((Date)args[2]).map(PGCalendar::toCalendar).orElseGet(() -> new PGCalendar(startYear, Month.JANUARY, 1));
 
-        ofNullable((Font)args[3]).ifPresent(f -> Fonts.setFonts(this, f));
+        ofNullable((Font)args[3]).ifPresent(f -> Fonts.setFont(this, f));
         updateYearDropdownList();
         prevMonthButton.addActionListener(this::onPrevMonth);
         nextMonthButton.addActionListener(this::onNextMonth);
