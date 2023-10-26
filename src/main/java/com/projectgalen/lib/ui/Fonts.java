@@ -50,6 +50,10 @@ public final class Fonts {
 
     private Fonts() { }
 
+    public static void adjustFontSizes(@NotNull Component c, float delta, String @NotNull ... menuItemsToIgnore) {
+        setFont(c, font -> font.deriveFont(font.getSize() + delta), menuItemsToIgnore);
+    }
+
     public static @NotNull Font addFontStyle(@NotNull Font font, @MagicConstant(flags = { Font.BOLD, Font.ITALIC }) int addStyle) {
         return font.deriveFont(font.getStyle() | addStyle);
     }
