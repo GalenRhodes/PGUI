@@ -1,7 +1,7 @@
-package com.projectgalen.lib.ui;
+package com.projectgalen.lib.ui.menus;
 // ================================================================================================================================
 //     PROJECT: PGUI
-//    FILENAME: PGJMenu.java
+//    FILENAME: PGJMenuBar.java
 //         IDE: IntelliJ IDEA
 //      AUTHOR: Galen Rhodes
 //        DATE: October 26, 2023
@@ -18,24 +18,17 @@ package com.projectgalen.lib.ui;
 // ================================================================================================================================
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import java.awt.event.ActionListener;
 
 @SuppressWarnings("unused")
-public class PGJMenu extends JMenu {
+public class PGJMenuBar extends JMenuBar {
 
-    public PGJMenu(@NotNull String text, JComponent... items) {
-        this(text, null, items);
-    }
+    public PGJMenuBar(JMenu @NotNull ... items) {
+        super();
 
-    public PGJMenu(@NotNull String text, @Nullable ActionListener listener, JComponent... items) {
-        super(text);
-        if(listener != null) addActionListener(listener);
-        for(JComponent item : items) {
-            if(item instanceof JMenuItem menuItem) add(menuItem);
-            else if(item instanceof JPopupMenu.Separator separator) add(separator);
+        for(JMenu item : items) {
+            add(item);
         }
     }
 }

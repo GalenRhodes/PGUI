@@ -1,4 +1,4 @@
-package com.projectgalen.lib.ui;
+package com.projectgalen.lib.ui.menus;
 // ================================================================================================================================
 //     PROJECT: PGUI
 //    FILENAME: PGJMenuItem.java
