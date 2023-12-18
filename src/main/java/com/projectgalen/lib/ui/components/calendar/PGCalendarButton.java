@@ -25,9 +25,9 @@ package com.projectgalen.lib.ui.components.calendar;
 import com.projectgalen.lib.ui.UI;
 import com.projectgalen.lib.ui.dialogs.PGCalendarDialog;
 import com.projectgalen.lib.ui.utils.Mnemonic;
-import com.projectgalen.lib.utils.Dates;
-import com.projectgalen.lib.utils.PGCalendar;
-import com.projectgalen.lib.utils.Range;
+import com.projectgalen.lib.utils.dates.Dates;
+import com.projectgalen.lib.utils.dates.PGCalendar;
+import com.projectgalen.lib.utils.math.Range;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -39,7 +39,7 @@ import java.util.Objects;
 
 import static com.projectgalen.lib.ui.M.msgs;
 import static com.projectgalen.lib.ui.M.props;
-import static com.projectgalen.lib.utils.PGCalendar.getInstance;
+import static com.projectgalen.lib.utils.dates.PGCalendar.getInstance;
 import static java.util.Optional.ofNullable;
 
 @SuppressWarnings("unused")

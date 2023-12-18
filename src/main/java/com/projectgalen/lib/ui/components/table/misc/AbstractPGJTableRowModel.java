@@ -26,7 +26,7 @@ import com.projectgalen.lib.ui.M;
 import com.projectgalen.lib.ui.events.TableCellModelEvent;
 import com.projectgalen.lib.ui.events.TableCellModelEvent.EventType;
 import com.projectgalen.lib.ui.listeners.TableCellModelListener;
-import com.projectgalen.lib.utils.EventListeners;
+import com.projectgalen.lib.utils.events.EventListeners;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

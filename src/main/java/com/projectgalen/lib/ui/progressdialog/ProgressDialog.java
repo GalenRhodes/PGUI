@@ -2,7 +2,7 @@ package com.projectgalen.lib.ui.progressdialog;
 
 import com.projectgalen.lib.ui.UIButtonChoice;
 import com.projectgalen.lib.ui.errors.ProgressDialogException;
-import com.projectgalen.lib.utils.ProgressReporter;
+import com.projectgalen.lib.utils.ui.ProgressReporter;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

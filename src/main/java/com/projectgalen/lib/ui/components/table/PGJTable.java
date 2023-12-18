@@ -6,7 +6,7 @@ import com.projectgalen.lib.ui.components.table.PGJTable.DummyRowModel.DummyData
 import com.projectgalen.lib.ui.components.table.PGJTable.DummyRowModel.DummyDataSupplier.DummyData;
 import com.projectgalen.lib.ui.components.table.misc.*;
 import com.projectgalen.lib.ui.interfaces.PGDataSupplier;
-import com.projectgalen.lib.utils.EventListeners;
+import com.projectgalen.lib.utils.events.EventListeners;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

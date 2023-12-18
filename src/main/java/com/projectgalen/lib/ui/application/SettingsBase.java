@@ -26,9 +26,9 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.projectgalen.lib.utils.IO;
 import com.projectgalen.lib.utils.concurrency.Trigger;
-import com.projectgalen.lib.utils.json.JsonTools;
+import com.projectgalen.lib.utils.io.IO;
+import com.projectgalen.lib.utils.json.JSON;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -63,7 +63,7 @@ public abstract class SettingsBase {
     protected void saveSettings() throws IOException {
         //noinspection ResultOfMethodCallIgnored
         settingsFile.getParentFile().mkdirs();
-        JsonTools.getObjectMapper().writeValue(settingsFile, this);
+        JSON.getObjectMapper().writeValue(settingsFile, this);
     }
 
     public static @NotNull <T extends SettingsBase> T load(@NotNull Class<T> cls, @NotNull String filename) {
@@ -71,7 +71,7 @@ public abstract class SettingsBase {
 
         if(settingsFile.exists() && settingsFile.isFile()) {
             try {
-                T settings = JsonTools.readJsonFile(settingsFile, cls);
+                T settings = JSON.readJsonFile(settingsFile, cls);
                 settings.settingsFile = settingsFile;
                 return settings;
             }

@@ -22,7 +22,7 @@ package com.projectgalen.lib.ui.test;
 // IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 // ===========================================================================
 
-import com.projectgalen.lib.utils.U;
+import com.projectgalen.lib.utils.helpers.U;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
